@@ -53,9 +53,9 @@ export function CartDrawer({ open, onOpenChange }: { open: boolean; onOpenChange
         {items.length > 0 && (
           <div className="border-t border-border p-4">
             <div className="mb-3 flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="font-bold">{formatZAR(subtotal)}</span></div>
-            {subtotal < 500 && <div className="mb-3 rounded-md bg-accent/10 px-3 py-2 text-xs font-medium text-accent">Add {formatZAR(500 - subtotal)} more for FREE delivery 🚚</div>}
+            {subtotal < 500 && <div className="mb-3 rounded-md bg-secondary px-3 py-2 text-xs font-medium text-primary-dark">Add {formatZAR(500 - subtotal)} more for FREE delivery</div>}
             <Link to="/cart" onClick={() => onOpenChange(false)} className="mb-2 block rounded-md border border-border py-2.5 text-center text-sm font-bold hover:bg-muted">View Cart</Link>
-            <Link to="/checkout" onClick={() => onOpenChange(false)} className="block rounded-md bg-primary py-2.5 text-center text-sm font-bold text-primary-foreground hover:bg-primary-dark">Checkout →</Link>
+            <Link to="/checkout" onClick={() => onOpenChange(false)} className="block rounded-md bg-primary py-2.5 text-center text-sm font-bold text-primary-foreground hover:bg-primary-dark">Checkout</Link>
           </div>
         )}
       </SheetContent>
