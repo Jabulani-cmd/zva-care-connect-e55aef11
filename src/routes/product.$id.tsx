@@ -112,7 +112,7 @@ function ProductPage() {
               {tab === "desc" && <p>{product.longDesc}</p>}
               {tab === "ingredients" && <p>{product.ingredients}</p>}
               {tab === "use" && <p>{product.howToUse}</p>}
-              {tab === "reviews" && <p>★ {product.rating.toFixed(1)} from {product.reviewCount} verified customers. "Excellent product, fast delivery, will buy again!" — Verified buyer</p>}
+              {tab === "reviews" && <p>{product.rating.toFixed(1)} / 5 from {product.reviewCount} verified customers. "Excellent product, fast delivery, will buy again!" — Verified buyer</p>}
             </div>
           </div>
         </div>
