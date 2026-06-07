@@ -58,7 +58,7 @@ export const DEMO_CUSTOMERS: DemoCustomer[] = [
     user: { id: "c_thabo", email: "thabo.nkosi@demo.plus2pharmacy.com", firstName: "Thabo", lastName: "Nkosi", phone: "071 234 5678", points: 1820, tier: "Gold" },
     orders: [
       mkOrder({ id: "P2-001", date: "3 days ago", total: 48.97, status: "Delivered", address: ADDR_THABO, items: [{ name: "Panado 500mg 24s", qty: 2, price: 29.99 }, { name: "Vitaforce Multivitamin", qty: 1, price: 149.99 }, { name: "Dettol Antiseptic", qty: 1, price: 64.99 }] }),
-      mkOrder({ id: "P2-002", date: "Today 11:30", total: 137.97, status: "Out for delivery", address: ADDR_THABO, items: [{ name: "USN Whey Protein 1kg", qty: 1, price: 499.99 }, { name: "Bioplus Energy", qty: 2, price: 89.99 }], driver: { name: "Siphamandla Dube", phone: "079 334 5566", vehicle: "VW Polo · GP 12 FG 456" } }),
+      mkOrder({ id: "P2-002", date: "Today 11:30", total: 137.97, status: "Out for delivery", address: ADDR_THABO, items: [{ name: "USN Whey Protein 1kg", qty: 1, price: 499.99 }, { name: "Bioplus Energy", qty: 2, price: 89.99 }], driver: { name: "Siphamandla Dube", phone: "+263 77 334 5566", vehicle: "VW Polo · AEB 7790" } }),
     ],
     prescriptions: [
       { id: "RX-2025-000021", fileName: "amlodipine.pdf", patientName: "Thabo Nkosi", doctorName: "Dr Patel", status: "Approved", uploadedAt: "2 days ago", notes: "Amlodipine 10mg" },
