@@ -24,9 +24,11 @@ function AuthPage() {
 
   return (
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-2 lg:py-14">
-      <div className="hidden flex-col justify-center rounded-md bg-primary p-10 text-primary-foreground shadow-sm lg:flex">
-        <Logo className="[&_*]:!text-white" />
-        <h2 className="mt-8 text-3xl font-extrabold leading-tight">Your health, one tap away.</h2>
+      <div className="relative hidden flex-col justify-center overflow-hidden rounded-md bg-primary p-10 text-primary-foreground shadow-sm lg:flex">
+        <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
+        <BrandLockup />
+        <h2 className="mt-10 text-3xl font-extrabold leading-tight">Your health, one tap away.</h2>
         <p className="mt-3 text-white/90">Manage prescriptions, track deliveries and shop the full pharmacy from anywhere in Zimbabwe.</p>
         <ul className="mt-8 space-y-3 text-sm">
           <li className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-white" /> Secure, encrypted account</li>
@@ -40,7 +42,8 @@ function AuthPage() {
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
-        <div className="mb-6 flex gap-2 lg:hidden"><Logo /></div>
+        <div className="mb-6 flex justify-center lg:hidden"><BrandLockup compact /></div>
+        <div className="mb-6 hidden justify-center lg:flex"><BrandMark size={56} /></div>
 
         {mode !== "forgot" && (
           <div className="mb-6 flex rounded-md bg-muted p-1 text-sm font-semibold">
