@@ -61,9 +61,9 @@ function StaffLayout() {
   const staff = useStaffAuth((s) => s.staff);
   const logout = useStaffAuth((s) => s.logout);
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const searchRaw = useRouterState({ select: (s) => s.location.search });
-  const search = (searchRaw ?? {}) as Record<string, string>;
+  const location = useRouterState({ select: (s) => s.location });
+  const pathname = location.pathname;
+  const search = (location.search ?? {}) as unknown as Record<string, string>;
 
   // /staff/login is public — allow without auth
   const isLogin = pathname === "/staff/login";
