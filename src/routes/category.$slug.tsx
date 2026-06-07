@@ -59,7 +59,7 @@ function CategoryPage() {
         </div>
       </div>
       <div>
-        <h4 className="mb-2 text-sm font-bold">Max Price: R{maxPrice}</h4>
+        <h4 className="mb-2 text-sm font-bold">Max Price: US${maxPrice}</h4>
         <input type="range" min={50} max={700} value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full accent-[var(--color-primary)]" />
       </div>
       <div className="space-y-2">
