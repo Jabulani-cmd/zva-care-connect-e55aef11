@@ -119,9 +119,8 @@ function PrescriptionsPage() {
     (s) => s.markPaid
   );
 
-  const [payingRx, setPayingRx] = useState
-    (typeof sharedPrescriptions)[0] | null
-  >(null);
+  // ✅ FIXED: missing angle bracket after useState
+  const [payingRx, setPayingRx] = useState<(typeof sharedPrescriptions)[0] | null>(null);
 
   useEffect(() => {
     if (!user) navigate({ to: "/auth" });
