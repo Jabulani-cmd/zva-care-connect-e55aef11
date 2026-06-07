@@ -5,7 +5,7 @@ import { useShop, formatZAR } from "@/store/shop";
 import { useAuth, type Order } from "@/store/auth";
 import { getProduct } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
-import { Award, Package, Heart, MapPin, Settings, LayoutDashboard, FileText, Truck, LogOut } from "lucide-react";
+import { Package, Heart, MapPin, Settings, LayoutDashboard, FileText, Truck, LogOut, Phone } from "lucide-react";
 
 export const Route = createFileRoute("/account")({
   head: () => ({ meta: [{ title: "My Account — Plus2 Pharmacy" }] }),
@@ -31,7 +31,6 @@ function AccountPage() {
     { id: "orders", label: "Orders", icon: Package },
     { id: "scripts", label: "Prescriptions", icon: FileText },
     { id: "wishlist", label: "Wishlist", icon: Heart },
-    { id: "card", label: "Benefit Card", icon: Award },
     { id: "address", label: "Addresses", icon: MapPin },
     { id: "settings", label: "Settings", icon: Settings },
   ] as const;
@@ -45,7 +44,7 @@ function AccountPage() {
           <div>
             <div className="text-xs font-bold uppercase tracking-wider opacity-90">Welcome back</div>
             <h1 className="mt-1 text-2xl font-extrabold md:text-3xl">Hi, {user.firstName} 👋</h1>
-            <p className="mt-1 text-sm opacity-95">You have <strong>{user.points.toLocaleString()} points</strong> ready to redeem · {user.tier} tier</p>
+            <p className="mt-1 text-sm opacity-95">{orders.length} order{orders.length !== 1 ? "s" : ""} · {prescriptions.length} prescription{prescriptions.length !== 1 ? "s" : ""} on file</p>
           </div>
           <button onClick={onLogout} className="inline-flex items-center gap-2 rounded-md bg-white/15 px-3 py-1.5 text-xs font-bold backdrop-blur hover:bg-white/25"><LogOut className="h-4 w-4" /> Sign out</button>
         </div>
@@ -68,7 +67,15 @@ function AccountPage() {
         <div>
           {tab === "dash" && (
             <div className="grid gap-4 sm:grid-cols-2">
-              <BenefitCard name={`${user.firstName} ${user.lastName}`} points={user.points} tier={user.tier} />
+              <div className="rounded-xl border border-border bg-card p-5">
+                <h3 className="font-extrabold">Profile</h3>
+                <div className="mt-3 space-y-1 text-sm">
+                  <div><span className="text-muted-foreground">Name:</span> <strong>{user.firstName} {user.lastName}</strong></div>
+                  <div><span className="text-muted-foreground">Email:</span> <strong>{user.email}</strong></div>
+                  {user.phone && <div className="flex items-center gap-1.5"><Phone className="h-3 w-3 text-muted-foreground" /> <strong>{user.phone}</strong></div>}
+                </div>
+                <Link to="/prescriptions" className="mt-4 inline-block rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase text-primary-foreground hover:bg-primary-dark">+ Upload script</Link>
+              </div>
               <div className="rounded-xl border border-border bg-card p-5">
                 <h3 className="font-extrabold">Active delivery</h3>
                 {(() => {
@@ -145,11 +152,10 @@ function AccountPage() {
               ? <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">Nothing wishlisted yet.</div>
               : <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{wishlist.map((p) => <ProductCard key={p!.id} product={p!} />)}</div>
           )}
-          {tab === "card" && <BenefitCard large name={`${user.firstName} ${user.lastName}`} points={user.points} tier={user.tier} />}
           {tab === "address" && (
             <div className="rounded-xl border border-border bg-card p-5">
               <h3 className="font-extrabold">Default Address</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{user.firstName} {user.lastName}<br />42 Long Street, Gardens<br />Cape Town, 8001</p>
+              <p className="mt-2 text-sm text-muted-foreground">{user.firstName} {user.lastName}<br />18 Sam Nujoma Street, Avondale<br />Harare, Zimbabwe</p>
               <button className="mt-4 rounded-md border border-border px-4 py-2 text-sm font-bold hover:bg-muted">Edit</button>
             </div>
           )}
@@ -187,27 +193,4 @@ function Stat({ label, value }: { label: string; value: number }) {
 function StatusPill({ status }: { status: Order["status"] }) {
   const cls = status === "Delivered" ? "bg-success/15 text-success" : status === "Out for delivery" ? "bg-accent/15 text-accent-foreground" : status === "Packed" ? "bg-primary/10 text-primary" : "bg-warning/20 text-foreground";
   return <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${cls}`}>{status}</span>;
-}
-
-function BenefitCard({ large = false, name, points, tier }: { large?: boolean; name: string; points: number; tier: string }) {
-  return (
-    <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-dark to-foreground p-5 text-primary-foreground shadow-lg ${large ? "max-w-md" : ""}`}>
-      <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-accent/30 blur-2xl" />
-      <div className="relative">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider opacity-90">Plus2 Benefit Card</span>
-          <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-accent-foreground">{tier.toUpperCase()}</span>
-        </div>
-        <div className="mt-6 text-3xl font-extrabold">{points.toLocaleString()} pts</div>
-        <div className="mt-1 text-sm opacity-90">Worth R{(points / 10).toFixed(2)} in savings</div>
-        <div className="mt-6 flex items-end justify-between">
-          <div>
-            <div className="text-[10px] uppercase opacity-75">Member</div>
-            <div className="font-bold">{name}</div>
-          </div>
-          <button className="rounded-md bg-white/20 px-3 py-1.5 text-xs font-bold backdrop-blur hover:bg-white/30">Redeem →</button>
-        </div>
-      </div>
-    </div>
-  );
 }

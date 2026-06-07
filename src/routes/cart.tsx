@@ -22,7 +22,7 @@ function CartPage() {
   const items = cart.map((c) => ({ ...c, product: getProduct(c.id)! })).filter((i) => i.product);
   const subtotal = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
   const discount = promoCode === "PLUS10" ? subtotal * 0.1 : 0;
-  const delivery = subtotal >= 500 ? 0 : subtotal === 0 ? 0 : 65;
+  const delivery = subtotal >= 50 ? 0 : subtotal === 0 ? 0 : 5;
   const total = subtotal - discount + delivery;
   const upsell = PRODUCTS.filter((p) => !cart.some((c) => c.id === p.id)).slice(0, 4);
 

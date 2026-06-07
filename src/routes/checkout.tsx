@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useShop, formatZAR } from "@/store/shop";
+import { useShop, formatZAR, formatZIG } from "@/store/shop";
 import { getProduct } from "@/data/products";
-import { Check, CreditCard, Truck, MapPin, Sparkles } from "lucide-react";
+import { Check, CreditCard, Truck, MapPin, Sparkles, Smartphone, Building2, Banknote } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Plus2 Pharmacy" }] }),
@@ -18,12 +18,12 @@ function Checkout() {
   const navigate = useNavigate();
   const items = cart.map((c) => ({ ...c, product: getProduct(c.id)! })).filter((i) => i.product);
   const subtotal = items.reduce((s, i) => s + i.product.price * i.qty, 0);
-  const delivery = subtotal >= 500 ? 0 : 65;
+  const delivery = subtotal >= 50 ? 0 : 5;
   const total = subtotal + delivery;
 
   const [step, setStep] = useState(0);
-  const [delivery_, setDelivery] = useState({ firstName: "", lastName: "", phone: "", email: "", street: "", suburb: "", city: "Cape Town", province: "Western Cape", postal: "", method: "standard" });
-  const [payment, setPayment] = useState({ method: "card", number: "", expiry: "", cvv: "", name: "" });
+  const [delivery_, setDelivery] = useState({ firstName: "", lastName: "", phone: "", email: "", street: "", suburb: "", city: "Harare", province: "Harare", postal: "", method: "standard" });
+  const [payment, setPayment] = useState({ method: "ecocash", number: "", expiry: "", cvv: "", name: "", mobile: "" });
   const orderNumber = "P2-" + Math.floor(100000 + Math.random() * 900000);
 
   if (items.length === 0 && step < 3) {
@@ -69,9 +69,10 @@ function Checkout() {
                 <h3 className="mb-2 text-sm font-bold">Delivery Method</h3>
                 <div className="space-y-2">
                   {[
-                    { id: "standard", label: "Standard Delivery", desc: "3–5 working days", price: subtotal >= 500 ? "FREE" : "R65" },
-                    { id: "express", label: "Express Delivery", desc: "1–2 working days", price: "R89" },
-                    { id: "collect", label: "Click & Collect", desc: "Ready in 2 hours at nearest store", price: "FREE" },
+                    { id: "standard", label: "Standard Delivery (Harare metro)", desc: "1–2 working days", price: subtotal >= 50 ? "FREE" : "US$5.00" },
+                    { id: "express", label: "Same-day Express (Harare)", desc: "Within 4 hours", price: "US$8.00" },
+                    { id: "national", label: "Nationwide Courier", desc: "Bulawayo, Mutare, Gweru — 2–4 days", price: "US$12.00" },
+                    { id: "collect", label: "Click & Collect", desc: "Borrowdale or Avondale branch", price: "FREE" },
                   ].map((d) => (
                     <label key={d.id} className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition ${delivery_.method === d.id ? "border-primary bg-primary/5" : "border-border"}`}>
                       <input type="radio" checked={delivery_.method === d.id} onChange={() => setDelivery({ ...delivery_, method: d.id })} className="accent-[var(--color-primary)]" />
@@ -88,13 +89,43 @@ function Checkout() {
           {step === 1 && (
             <div>
               <h2 className="flex items-center gap-2 text-lg font-extrabold"><CreditCard className="h-5 w-5 text-primary" /> Payment</h2>
-              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <p className="mt-1 text-xs text-muted-foreground">Pay in USD or ZIG (Zimbabwe Gold). Equivalent: <span className="font-bold text-foreground">{formatZIG(total)}</span></p>
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {[
-                  { id: "card", label: "Card" }, { id: "eft", label: "EFT" }, { id: "mobicred", label: "Mobicred" }, { id: "benefit", label: "Benefit Card" },
-                ].map((p) => (
-                  <button key={p.id} onClick={() => setPayment({ ...payment, method: p.id })} className={`rounded-lg border-2 p-3 text-sm font-bold transition ${payment.method === p.id ? "border-primary bg-primary/5 text-primary" : "border-border"}`}>{p.label}</button>
-                ))}
+                  { id: "ecocash", label: "EcoCash", icon: Smartphone, badge: "Most popular" },
+                  { id: "onemoney", label: "OneMoney", icon: Smartphone },
+                  { id: "innbucks", label: "InnBucks", icon: Smartphone },
+                  { id: "zig", label: "ZIG Wallet (RBZ)", icon: Banknote },
+                  { id: "card", label: "USD Card / Visa", icon: CreditCard },
+                  { id: "bank", label: "Bank Transfer (ZB / CBZ)", icon: Building2 },
+                ].map((p) => {
+                  const Icon = p.icon;
+                  const active = payment.method === p.id;
+                  return (
+                    <button key={p.id} type="button" onClick={() => setPayment({ ...payment, method: p.id })} className={`relative flex items-center gap-2 rounded-lg border-2 p-3 text-left text-sm font-bold transition ${active ? "border-primary bg-primary/5 text-primary" : "border-border hover:border-primary/40"}`}>
+                      <Icon className="h-5 w-5 shrink-0" />
+                      <span className="truncate">{p.label}</span>
+                      {p.badge && <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[9px] uppercase text-accent-foreground">{p.badge}</span>}
+                    </button>
+                  );
+                })}
               </div>
+
+              {(payment.method === "ecocash" || payment.method === "onemoney" || payment.method === "innbucks") && (
+                <div className="mt-5 space-y-3 rounded-lg bg-surface p-4 text-sm">
+                  <p className="text-muted-foreground">Enter your registered <strong>{payment.method === "ecocash" ? "EcoCash" : payment.method === "onemoney" ? "OneMoney" : "InnBucks"}</strong> mobile number. We'll send a payment prompt — approve on your phone to complete checkout.</p>
+                  <Field label="Mobile number" value={payment.mobile} onChange={(v) => setPayment({ ...payment, mobile: v })} placeholder="+263 77 123 4567" />
+                  <div className="rounded-md border border-dashed border-border bg-background p-3 text-xs text-muted-foreground">
+                    💡 Dial *151# (EcoCash) or *111# (OneMoney) if you don't receive a prompt within 60 seconds.
+                  </div>
+                </div>
+              )}
+              {payment.method === "zig" && (
+                <div className="mt-5 rounded-lg bg-surface p-4 text-sm">
+                  <p>You'll pay <strong>{formatZIG(total)}</strong> from your ZIG digital wallet. RBZ-approved instant settlement.</p>
+                  <Field label="ZIG Wallet ID" value={payment.number} onChange={(v) => setPayment({ ...payment, number: v })} placeholder="ZIG-XXXX-XXXX" />
+                </div>
+              )}
               {payment.method === "card" && (
                 <div className="mt-5 grid grid-cols-2 gap-3">
                   <Field label="Cardholder name" value={payment.name} onChange={(v) => setPayment({ ...payment, name: v })} className="col-span-2" />
@@ -103,9 +134,18 @@ function Checkout() {
                   <Field label="CVV" value={payment.cvv} onChange={(v) => setPayment({ ...payment, cvv: v })} placeholder="123" />
                 </div>
               )}
-              {payment.method === "eft" && <p className="mt-4 rounded-md bg-muted p-4 text-sm">Bank details will appear on the next screen. Pay using your banking app.</p>}
-              {payment.method === "mobicred" && <p className="mt-4 rounded-md bg-muted p-4 text-sm">You'll be redirected to Mobicred to complete your payment in instalments.</p>}
-              {payment.method === "benefit" && <p className="mt-4 rounded-md bg-muted p-4 text-sm">Apply your <strong>2,450</strong> Plus2 Benefit Card points (worth R245.00).</p>}
+              {payment.method === "bank" && (
+                <div className="mt-5 space-y-2 rounded-lg bg-surface p-4 text-sm">
+                  <p className="font-bold">Pay via RTGS / ZIPIT to:</p>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>Bank: <strong>ZB Bank</strong></li>
+                    <li>Account name: <strong>Plus2 Pharmacy (Pvt) Ltd</strong></li>
+                    <li>Account no: <strong>4123 8870 9921</strong></li>
+                    <li>Branch: Avondale (2189)</li>
+                    <li>Reference: <strong>{orderNumber}</strong></li>
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
@@ -123,9 +163,9 @@ function Checkout() {
               </div>
               <div className="mt-4 rounded-lg bg-surface p-4 text-sm">
                 <div className="font-bold">Delivering to:</div>
-                <div className="text-muted-foreground">{delivery_.firstName} {delivery_.lastName}, {delivery_.street}, {delivery_.suburb}, {delivery_.city}</div>
+                <div className="text-muted-foreground">{delivery_.firstName} {delivery_.lastName}, {delivery_.street}, {delivery_.suburb}, {delivery_.city}, Zimbabwe</div>
                 <div className="mt-2 font-bold">Paying with:</div>
-                <div className="text-muted-foreground capitalize">{payment.method}</div>
+                <div className="text-muted-foreground capitalize">{labelFor(payment.method)}</div>
               </div>
             </div>
           )}
@@ -137,8 +177,9 @@ function Checkout() {
               <p className="mt-1 text-muted-foreground">A confirmation email is on its way.</p>
               <div className="mx-auto mt-6 max-w-sm rounded-xl bg-surface p-5 text-left text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Order number</span><span className="font-extrabold">{orderNumber}</span></div>
-                <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Estimated delivery</span><span className="font-bold">3–5 working days</span></div>
+                <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Estimated delivery</span><span className="font-bold">1–2 working days</span></div>
                 <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Total paid</span><span className="font-extrabold">{formatZAR(total)}</span></div>
+                <div className="mt-1 flex justify-between text-xs"><span className="text-muted-foreground">ZIG equivalent</span><span className="font-bold">{formatZIG(total)}</span></div>
               </div>
               <div className="mt-6 flex justify-center gap-3">
                 <button className="rounded-md border border-border px-5 py-2.5 font-bold hover:bg-muted">Track Order</button>
@@ -168,6 +209,7 @@ function Checkout() {
                 <Row label="Delivery" value={delivery === 0 ? "FREE" : formatZAR(delivery)} />
                 <div className="my-2 border-t border-border" />
                 <Row label={<span className="text-base font-bold">Total</span>} value={<span className="text-lg font-extrabold">{formatZAR(total)}</span>} />
+                <div className="mt-1 flex justify-between text-xs text-muted-foreground"><span>≈ ZIG</span><span>{formatZIG(total)}</span></div>
               </div>
             </div>
           </aside>
@@ -187,4 +229,8 @@ function Field({ label, value, onChange, type = "text", placeholder, className =
 }
 function Row({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return <div className="flex justify-between"><span className="text-muted-foreground">{label}</span><span className="font-semibold">{value}</span></div>;
+}
+
+function labelFor(method: string) {
+  return { ecocash: "EcoCash", onemoney: "OneMoney", innbucks: "InnBucks", zig: "ZIG Wallet", card: "USD Card", bank: "Bank Transfer" }[method] ?? method;
 }
