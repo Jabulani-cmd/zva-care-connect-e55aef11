@@ -1,48 +1,50 @@
-export type Category = { slug: string; name: string; emoji: string; bg: string };
+import { Pill, Sparkles, Baby, Leaf, Droplets, Dumbbell, Home, PawPrint } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+export type Category = { slug: string; name: string; icon: LucideIcon; image: string };
 
 export const CATEGORIES: Category[] = [
-  { slug: "pharmacy", name: "Pharmacy", emoji: "💊", bg: "oklch(0.93 0.1 150)" },
-  { slug: "beauty", name: "Beauty", emoji: "💄", bg: "oklch(0.93 0.09 0)" },
-  { slug: "baby", name: "Baby", emoji: "👶", bg: "oklch(0.94 0.08 50)" },
-  { slug: "vitamins", name: "Vitamins", emoji: "💪", bg: "oklch(0.93 0.1 75)" },
-  { slug: "personal", name: "Personal Care", emoji: "🧴", bg: "oklch(0.93 0.08 200)" },
-  { slug: "sports", name: "Sports Nutrition", emoji: "🏋️", bg: "oklch(0.92 0.1 30)" },
-  { slug: "household", name: "Household", emoji: "🏠", bg: "oklch(0.94 0.07 130)" },
-  { slug: "pets", name: "Pets", emoji: "🐾", bg: "oklch(0.93 0.09 280)" },
+  { slug: "pharmacy", name: "Pharmacy", icon: Pill, image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=1200&h=400&fit=crop" },
+  { slug: "beauty", name: "Beauty", icon: Sparkles, image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&h=400&fit=crop" },
+  { slug: "baby", name: "Baby & Maternity", icon: Baby, image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=1200&h=400&fit=crop" },
+  { slug: "vitamins", name: "Vitamins", icon: Leaf, image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop" },
+  { slug: "personal", name: "Personal Care", icon: Droplets, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1200&h=400&fit=crop" },
+  { slug: "sports", name: "Sports Nutrition", icon: Dumbbell, image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&h=400&fit=crop" },
+  { slug: "household", name: "Household", icon: Home, image: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=1200&h=400&fit=crop" },
+  { slug: "pets", name: "Pets", icon: PawPrint, image: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1200&h=400&fit=crop" },
 ];
 
 export const BRANDS = ["Panado", "Allergex", "Vitaforce", "Bioplus", "Lennon", "Natio", "Neutrogena", "Dove", "Huggies", "USN"];
 
 export const HERO_SLIDES = [
   {
-    headline: "Up to 30% off Winter Wellness",
-    subtext: "Vitamins, cold & flu essentials and immunity boosters — while stocks last.",
+    eyebrow: "Winter Wellness",
+    headline: "Up to 30% off Winter Essentials",
+    subtext: "Vitamins, cold & flu remedies and immunity boosters — while stocks last.",
     cta: "Shop the sale",
     href: "/category/vitamins",
-    gradient: "linear-gradient(120deg, oklch(0.92 0.18 95) 0%, oklch(0.85 0.2 85) 100%)",
-    textDark: true,
-    emoji: "❄️",
+    image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=1400&h=500&fit=crop",
   },
   {
-    headline: "Earn with the Plus2 Benefit Card",
-    subtext: "Earn 1 point per R1 spent. Redeem in-store and online — it's free to join.",
-    cta: "Join free today",
-    href: "/account",
-    gradient: "linear-gradient(120deg, oklch(0.36 0.18 260) 0%, oklch(0.28 0.17 260) 100%)",
-    emoji: "💳",
+    eyebrow: "Trusted Care",
+    headline: "Upload Your Prescription Online",
+    subtext: "Our registered pharmacists review every script. Delivery to your door across Zimbabwe.",
+    cta: "Upload script",
+    href: "/prescriptions",
+    image: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=1400&h=500&fit=crop",
   },
   {
-    headline: "Free delivery on orders over R500",
-    subtext: "Fast, tracked, contactless delivery to your door anywhere in South Africa.",
+    eyebrow: "Fast Delivery",
+    headline: "Free Delivery on Orders Over US$50",
+    subtext: "Same-day delivery available in Harare. Tracked & contactless.",
     cta: "Start shopping",
     href: "/category/all",
-    gradient: "linear-gradient(120deg, oklch(0.55 0.24 27) 0%, oklch(0.42 0.22 25) 100%)",
-    emoji: "🚚",
+    image: "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=1400&h=500&fit=crop",
   },
 ];
 
 export const BLOG_POSTS = [
-  { id: "1", category: "Wellness", title: "5 Vitamins to Boost Your Winter Immunity", readTime: "4 min read", emoji: "🍊", bg: "oklch(0.92 0.12 75)" },
-  { id: "2", category: "Baby Care", title: "A Parent's Guide to Choosing the Right Nappy", readTime: "6 min read", emoji: "👶", bg: "oklch(0.93 0.08 50)" },
-  { id: "3", category: "Skincare", title: "Why Hyaluronic Acid Belongs in Your Routine", readTime: "5 min read", emoji: "💧", bg: "oklch(0.92 0.09 220)" },
+  { id: "1", category: "Wellness", title: "5 Vitamins to Boost Your Winter Immunity", readTime: "4 min read", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop" },
+  { id: "2", category: "Baby Care", title: "A Parent's Guide to Choosing the Right Nappy", readTime: "6 min read", image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=600&h=400&fit=crop" },
+  { id: "3", category: "Skincare", title: "Why Hyaluronic Acid Belongs in Your Routine", readTime: "5 min read", image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&h=400&fit=crop" },
 ];
