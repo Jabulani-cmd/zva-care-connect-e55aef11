@@ -27,7 +27,7 @@ import {
 // ============================================================
 // MAIN DASHBOARD
 // ============================================================
-export function PharmacistDashboard({ view }: { view?: string }) {
+export function PharmacistDashboard() {
   const sharedPrescriptions = useSharedPrescriptions(
     (s) => s.prescriptions
   );
@@ -85,14 +85,7 @@ export function PharmacistDashboard({ view }: { view?: string }) {
     ),
   ];
 
-  const filter =
-    view === "approved"
-      ? "Approved"
-      : view === "dispensed"
-      ? "Dispensed"
-      : "Pending";
-
-  const visible = allItems.filter((i) => i.status === filter);
+  const visible = allItems.filter((i) => i.status === "Pending");
 
   const counts = useMemo(
     () => ({
@@ -193,8 +186,7 @@ export function PharmacistDashboard({ view }: { view?: string }) {
       <div className="mt-6">
         <Card
           title={
-            filter +
-            " prescriptions (" +
+            "Pending prescriptions (" +
             visible.length +
             ")"
           }
