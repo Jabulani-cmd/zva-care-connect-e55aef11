@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/store/auth";
 import { Logo } from "@/components/layout/Logo";
-import { ShieldCheck, Truck, Sparkles, Mail } from "lucide-react";
+import { ShieldCheck, Truck, Sparkles, Mail, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { DEMO_CUSTOMERS } from "@/data/demoAccounts";
 
 type Mode = "login" | "register" | "forgot";
 
@@ -52,10 +53,72 @@ function AuthPage() {
         {mode === "register" && <RegisterForm onSuccess={() => navigate({ to: "/account" })} />}
         {mode === "forgot" && <ForgotForm onBack={() => setMode("login")} />}
 
+        {mode === "login" && <DemoAccountsPanel onLoggedIn={() => navigate({ to: "/account" })} />}
+
         <p className="mt-6 text-center text-xs text-muted-foreground">
           By continuing you agree to Plus2's <a href="#" className="underline">Terms</a> & <a href="#" className="underline">Privacy Policy</a>.
         </p>
       </div>
+    </div>
+  );
+}
+
+function DemoAccountsPanel({ onLoggedIn }: { onLoggedIn: () => void }) {
+  const login = useAuth((s) => s.login);
+  const [open, setOpen] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const handleLogin = async (email: string, password: string) => {
+    setBusy(email);
+    const r = await login(email, password);
+    setBusy(null);
+    if (!r.ok) return toast.error(r.error ?? "Login failed");
+    toast.success("Signed in to demo account");
+    onLoggedIn();
+  };
+
+  const colors = ["bg-primary", "bg-[#0EA5E9]", "bg-[#7C3AED]", "bg-[#F59E0B]", "bg-[#EC4899]"];
+
+  return (
+    <div className="mt-6 rounded-lg border border-[#BBF7D0] bg-[#F0F9F4] p-4">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <span className="flex items-center gap-2 text-sm font-bold text-primary-dark">
+          <Users className="h-4 w-4" /> Demo Customer Accounts — Click to Login
+        </span>
+        {open ? <ChevronUp className="h-4 w-4 text-primary-dark" /> : <ChevronDown className="h-4 w-4 text-primary-dark" />}
+      </button>
+      {open && (
+        <ul className="mt-3 space-y-2">
+          {DEMO_CUSTOMERS.map((c, i) => {
+            const initials = (c.user.firstName[0] + c.user.lastName[0]).toUpperCase();
+            return (
+              <li key={c.email}>
+                <button
+                  type="button"
+                  disabled={busy !== null}
+                  onClick={() => handleLogin(c.email, c.password)}
+                  className="flex w-full items-center gap-3 rounded-md border border-border bg-card px-4 py-3 text-left transition hover:border-primary hover:shadow-sm disabled:opacity-60"
+                >
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${colors[i % colors.length]}`}>
+                    {initials}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-foreground">{c.user.firstName} {c.user.lastName}</div>
+                    <div className="truncate text-xs text-muted-foreground">{c.email}</div>
+                  </div>
+                  <span className="shrink-0 rounded-md border border-primary px-3 py-1.5 text-xs font-bold text-primary">
+                    {busy === c.email ? "…" : "Login"}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

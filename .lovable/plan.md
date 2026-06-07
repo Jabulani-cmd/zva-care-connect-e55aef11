@@ -1,90 +1,60 @@
-# Plus2 Pharmacy — Demo App Plan
+# Plus2 Pharmacy — Full Demo Mode Build Plan
 
-A production-feel, mobile-first pharmacy e-commerce demo inspired by Dis-Chem, built for a 30-min investor presentation. Fully client-side, no backend.
+This is a very large scope. Before I start coding, I want to align on approach so we don't burn hours on the wrong direction.
 
-## Brand & Design System
-- Name: **Plus2 Pharmacy** — tagline "Your Health, Our Priority"
-- Colors via `src/styles.css` tokens (oklch):
-  - `--primary` Dis-Chem green `#00853F`
-  - `--accent` orange `#F26522` (sale badges, CTAs)
-  - Neutrals: white, light grey surface, deep grey text
-  - Success/warn/info tokens for stock states
-- Font: Inter (loaded via `<link>` in `__root.tsx`, registered in `@theme`)
-- Logo: SVG green cross/pill + "Plus2 Pharmacy" wordmark (inline component)
-- Tailwind v4 tokens, semantic classes only — no hardcoded hex in components
+## What you're asking for (scope summary)
 
-## Routes (TanStack Start, file-based)
-```
-src/routes/
-  __root.tsx          shell, fonts, Navbar, Footer, CartDrawer, Toaster, DemoBadge
-  index.tsx           Home
-  category.$slug.tsx  Product listing (filters, sort)
-  product.$id.tsx     Product detail
-  cart.tsx            Cart
-  checkout.tsx        Multi-step checkout (state machine)
-  account.tsx         Account dashboard (tabbed)
-  services.tsx        Pharmacy services + store locator
-```
-Each route gets unique `head()` metadata (title, description, og:*).
+1. **Demo accounts** — 5 customers + 6 staff with full profiles, addresses, health profiles, medical aid, order history, prescriptions, wishlists.
+2. **Seeded data** — 15 orders, 6 prescriptions, 4 drivers, 20 inventory items with stock levels, sales charts (hourly + 7-day + category), 12 expenses.
+3. **Payment workflows** — Simulated card (incl. 4242/4000 demo cards), PayFast modal, EFT with copy-to-clipboard, Cash on Delivery, full Rx payment flow, animated order confirmation.
+4. **Staff portal (NEW — doesn't exist yet)** — `/staff/login` plus 6 role-specific dashboards (Super Admin, Pharmacist, Store Manager, Dispatcher, Cashier, Inventory Clerk), each with KPIs, charts, queues, kanban boards, modals, POs, expense approvals.
+5. **Demo login panels** on both customer and staff login.
+6. **Demo Scenarios floating help button** with 5 walkthrough scripts.
 
-## Global State (Zustand)
-`src/store/shop.ts` — single store:
-- `products` (seeded ~20 SA products, see list below)
-- `cart: {id, qty}[]`, `wishlist: id[]`
-- `addToCart`, `removeFromCart`, `updateQty`, `toggleWishlist`, `clearCart`
-- `promoCode`, `appliedDiscount`
-- Persist to `localStorage`
+## Reality check
 
-## Components (`src/components/`)
-- `layout/Navbar.tsx` — sticky, logo, search (live filter via URL search param), wishlist, cart-count badge with bump animation; category strip below
-- `layout/Footer.tsx` — links, payment icons (Visa/MC/PayFast/PayGate/Mobicred SVGs), app badges, socials
-- `layout/MobileBottomNav.tsx` — Home/Categories/Cart/Account (mobile only)
-- `layout/DemoBadge.tsx` — floating "Demo Mode" pill bottom-right
-- `home/HeroCarousel.tsx` — embla, 3 gradient slides, auto-advance 5s
-- `home/CategoryGrid.tsx` — 8 categories w/ emoji + colored bg, horizontal scroll on mobile
-- `home/FlashDeals.tsx` — countdown timer + horizontal product row
-- `home/BrandsStrip.tsx`, `home/BlogTeasers.tsx`, `home/TopSellers.tsx`
-- `product/ProductCard.tsx` — image, SAVE % badge, name, brand, rating, price (strike + discount), Add-to-Cart, wishlist heart
-- `product/ProductGallery.tsx` — main + thumbs, swipeable
-- `product/QuantityStepper.tsx`, `product/StockBadge.tsx`, `product/RatingStars.tsx`
-- `listing/FilterSidebar.tsx` — desktop sidebar / mobile Sheet: brand checkboxes, price slider, rating, in-stock, on-promo
-- `listing/SortDropdown.tsx`
-- `cart/CartDrawer.tsx` — slide-out Sheet from navbar cart icon
-- `checkout/StepIndicator.tsx`, `checkout/DeliveryForm.tsx`, `checkout/PaymentForm.tsx`, `checkout/ReviewStep.tsx`, `checkout/Confirmation.tsx`
-- `account/BenefitCard.tsx` — green gradient loyalty card, points + tier
+The existing app has a customer storefront (cart, checkout, prescriptions, track, account) but **no staff portal at all**. Building 6 role-based dashboards with kanban boards, prescription review modals, PO creation, POS, expense approvals, and inter-account real-time state sync is roughly equivalent to building a second full app on top of the existing one.
 
-## Data (`src/data/`)
-- `products.ts` — 20 hardcoded SA products with realistic fields: id, name, brand, category, price, originalPrice?, savePct?, rating, reviewCount, stock ("in"|"low"|"out"), image (Unsplash URL or colored-bg emoji fallback), shortDesc, longDesc, ingredients, howToUse, isPrescription
-- `categories.ts` — 8 categories with emoji + color
-- `brands.ts`, `blogPosts.ts` (3), `heroSlides.ts` (3)
+A realistic honest estimate: this is **15–25+ hours of focused work** across ~40 new files. Doing it in one shot in a single response will almost certainly produce something that compiles but has broken flows, mismatched data, and missed checklist items — the opposite of what you need for an investor demo.
 
-Products list matches the 20 in the brief (Panado, Allergex, Bioplus, Vitaforce, Dove, Neutrogena, Huggies, Lennon, USN, Himalaya, Johnson's, Natio, Rennies, Oral-B, Nurofen, Herbalife, Pampers, Bio-Oil, Caltrate, Dettol).
+## Recommended approach — phased delivery
 
-## Interactions
-- Add-to-Cart → sonner toast "✅ Added to cart" + animated badge bump
-- Wishlist toggle → toast + filled heart
-- Search in navbar → navigates to `/category/all?q=...`, live-filters
-- Filters/sort fully functional via URL search params + Zustand
-- Checkout: react-hook-form per step with basic Zod validation; "Place Order" clears cart, generates order #, navigates to Confirmation
-- Promo code: hardcoded `PLUS10` → 10% off
-- Free delivery auto-applies over R500
+I'd like to split this into ~5 phases, each shippable and testable on its own. After each phase you can demo what's done and we course-correct before the next.
 
-## Responsive Strategy
-- Mobile-first; verified at 375px and 1280px+
-- Product grid: 2 / 3 / 4 cols
-- Filter sidebar → bottom Sheet on mobile
-- Cart: full page on mobile, drawer from navbar on desktop
-- Mobile bottom nav fixed; hidden md+
+**Phase 1 — Foundation (data + accounts)**
+- Central `src/data/demo.ts` with all 5 customers, 6 staff, 15 orders, 6 prescriptions, 4 drivers, 20 inventory items, sales/expenses data.
+- New `useDemoStore` Zustand store as single source of truth so customer + staff views stay in sync.
+- Update `useAuth` to support staff roles + demo login.
+- Demo login panel on `/auth` (customer) with one-click cards.
 
-## Out of Scope
-No backend, no real payment, no auth, no real map (placeholder image with city dropdown), no Lovable Cloud.
+**Phase 2 — Customer payment workflow**
+- Replace existing checkout payment step with the 4-method simulator (Card with 4242/4000 logic, PayFast modal, EFT with copy buttons, COD).
+- Animated order confirmation page with checkmark, tracker, receipt download.
+- Wire Rx payment notification flow.
 
----
+**Phase 3 — Staff portal shell + auth**
+- New routes: `/staff/login`, `/staff` layout with role-based nav, role-routing on login.
+- Staff demo login panel.
+- Shared KPI/Chart/Card components.
 
-## Technical Notes
-- Stack: TanStack Start v1 + React 19 + Tailwind v4 + shadcn (existing) + Zustand + sonner + embla + react-hook-form + zod + lucide-react + framer-motion (for badge bump / hover scale)
-- Install: `bun add zustand framer-motion react-hook-form zod`
-- Images: Unsplash hotlinks per product; fallback to colored div + emoji if needed
-- All colors via CSS tokens in `src/styles.css` under `@theme inline`
-- Delete the blank-page placeholder in `src/routes/index.tsx`
-- Add `notFoundComponent` + `errorComponent` on root and data routes
+**Phase 4 — Role dashboards (split into 2 sub-passes)**
+- 4a: Super Admin + Store Manager + Cashier (read-heavy + simple actions).
+- 4b: Pharmacist (Rx review modal), Dispatcher (kanban + driver assign), Inventory Clerk (PO flow). These are the interactive ones.
+
+**Phase 5 — Polish**
+- Demo Scenarios floating help panel.
+- Excel/PDF/Print exports on reports.
+- Final QA pass against your checklist at 375px + 1280px.
+
+## Technical notes
+- Everything stays client-side (Zustand + localStorage). No backend changes.
+- Currency stays USD/ZIG only — already enforced.
+- All "real-time" updates are local state mutations that propagate via Zustand subscribers.
+- Simulated PDFs use `jspdf`, Excel uses `xlsx` (will add as deps in the phase that needs them).
+- Prescription "script image" will be an SVG mockup, not a generated image, to keep it fast.
+
+## What I need from you
+
+1. **Confirm phased delivery is OK** — or tell me to power through it all in one go (with the quality caveat above).
+2. **Confirm Phase 1 should start now** — if yes, I'll begin immediately after your approval.
+3. **Anything to cut?** The 5 demo scenarios + 6 staff roles is a lot. If your investor demo only really needs Admin + Pharmacist + Dispatcher, we save ~30% of the work.
