@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as StaffRouteImport } from './routes/staff'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as PrescriptionsRouteImport } from './routes/prescriptions'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -17,12 +18,20 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StaffIndexRouteImport } from './routes/staff.index'
+import { Route as StaffLoginRouteImport } from './routes/staff.login'
+import { Route as StaffDashboardRouteImport } from './routes/staff.dashboard'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
   path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffRoute = StaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -60,6 +69,21 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffIndexRoute = StaffIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StaffRoute,
+} as any)
+const StaffLoginRoute = StaffLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => StaffRoute,
+} as any)
+const StaffDashboardRoute = StaffDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => StaffRoute,
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
@@ -79,9 +103,13 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/prescriptions': typeof PrescriptionsRoute
   '/services': typeof ServicesRoute
+  '/staff': typeof StaffRouteWithChildren
   '/track': typeof TrackRoute
   '/category/$slug': typeof CategorySlugRoute
   '/product/$id': typeof ProductIdRoute
+  '/staff/dashboard': typeof StaffDashboardRoute
+  '/staff/login': typeof StaffLoginRoute
+  '/staff/': typeof StaffIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,6 +122,9 @@ export interface FileRoutesByTo {
   '/track': typeof TrackRoute
   '/category/$slug': typeof CategorySlugRoute
   '/product/$id': typeof ProductIdRoute
+  '/staff/dashboard': typeof StaffDashboardRoute
+  '/staff/login': typeof StaffLoginRoute
+  '/staff': typeof StaffIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,9 +135,13 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/prescriptions': typeof PrescriptionsRoute
   '/services': typeof ServicesRoute
+  '/staff': typeof StaffRouteWithChildren
   '/track': typeof TrackRoute
   '/category/$slug': typeof CategorySlugRoute
   '/product/$id': typeof ProductIdRoute
+  '/staff/dashboard': typeof StaffDashboardRoute
+  '/staff/login': typeof StaffLoginRoute
+  '/staff/': typeof StaffIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,9 +153,13 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/prescriptions'
     | '/services'
+    | '/staff'
     | '/track'
     | '/category/$slug'
     | '/product/$id'
+    | '/staff/dashboard'
+    | '/staff/login'
+    | '/staff/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,6 +172,9 @@ export interface FileRouteTypes {
     | '/track'
     | '/category/$slug'
     | '/product/$id'
+    | '/staff/dashboard'
+    | '/staff/login'
+    | '/staff'
   id:
     | '__root__'
     | '/'
@@ -142,9 +184,13 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/prescriptions'
     | '/services'
+    | '/staff'
     | '/track'
     | '/category/$slug'
     | '/product/$id'
+    | '/staff/dashboard'
+    | '/staff/login'
+    | '/staff/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -155,6 +201,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   PrescriptionsRoute: typeof PrescriptionsRoute
   ServicesRoute: typeof ServicesRoute
+  StaffRoute: typeof StaffRouteWithChildren
   TrackRoute: typeof TrackRoute
   CategorySlugRoute: typeof CategorySlugRoute
   ProductIdRoute: typeof ProductIdRoute
@@ -167,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/track'
       fullPath: '/track'
       preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -218,6 +272,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staff/': {
+      id: '/staff/'
+      path: '/'
+      fullPath: '/staff/'
+      preLoaderRoute: typeof StaffIndexRouteImport
+      parentRoute: typeof StaffRoute
+    }
+    '/staff/login': {
+      id: '/staff/login'
+      path: '/login'
+      fullPath: '/staff/login'
+      preLoaderRoute: typeof StaffLoginRouteImport
+      parentRoute: typeof StaffRoute
+    }
+    '/staff/dashboard': {
+      id: '/staff/dashboard'
+      path: '/dashboard'
+      fullPath: '/staff/dashboard'
+      preLoaderRoute: typeof StaffDashboardRouteImport
+      parentRoute: typeof StaffRoute
+    }
     '/product/$id': {
       id: '/product/$id'
       path: '/product/$id'
@@ -235,6 +310,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface StaffRouteChildren {
+  StaffDashboardRoute: typeof StaffDashboardRoute
+  StaffLoginRoute: typeof StaffLoginRoute
+  StaffIndexRoute: typeof StaffIndexRoute
+}
+
+const StaffRouteChildren: StaffRouteChildren = {
+  StaffDashboardRoute: StaffDashboardRoute,
+  StaffLoginRoute: StaffLoginRoute,
+  StaffIndexRoute: StaffIndexRoute,
+}
+
+const StaffRouteWithChildren = StaffRoute._addFileChildren(StaffRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
@@ -243,6 +332,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   PrescriptionsRoute: PrescriptionsRoute,
   ServicesRoute: ServicesRoute,
+  StaffRoute: StaffRouteWithChildren,
   TrackRoute: TrackRoute,
   CategorySlugRoute: CategorySlugRoute,
   ProductIdRoute: ProductIdRoute,

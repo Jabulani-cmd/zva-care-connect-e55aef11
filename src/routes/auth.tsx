@@ -127,6 +127,16 @@ function AuthPage() {
 
         {mode === "login" && <DemoAccountsPanel onLoggedIn={() => navigate({ to: "/account" })} />}
 
+        <Link
+          to="/staff/login"
+          className="mt-3 flex items-center justify-between rounded-lg border border-dashed border-border bg-muted/40 px-4 py-3 text-xs font-semibold text-foreground transition hover:border-primary hover:bg-primary/5"
+        >
+          <span className="flex items-center gap-2">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            Pharmacy staff? Sign in to the Staff Portal →
+          </span>
+        </Link>
+
         <p className="mt-6 text-center text-xs text-muted-foreground">
           By continuing you agree to Plus2's <a href="#" className="underline">Terms</a> & <a href="#" className="underline">Privacy Policy</a>.
         </p>
