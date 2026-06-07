@@ -14,6 +14,7 @@ export type DemoCustomer = {
 
 export type StaffRole =
   | "super_admin"
+  | "system_admin"
   | "pharmacist"
   | "store_manager"
   | "dispatcher"
@@ -127,16 +128,18 @@ export const DEMO_CUSTOMERS: DemoCustomer[] = [
 ];
 
 export const DEMO_STAFF: DemoStaff[] = [
-  { email: "admin@plus2pharmacy.com", password: "Admin1234!", staffId: "STF-0001", name: "Admin User", role: "super_admin", roleLabel: "Super Admin", branch: "Head Office — Sandton", access: ["All modules"] },
-  { email: "pharmacist@plus2pharmacy.com", password: "Staff1234!", staffId: "STF-0042", name: "Dr. Aisha Moosa (B.Pharm)", role: "pharmacist", roleLabel: "Pharmacist", branch: "Sandton Branch", access: ["Prescriptions", "Orders (Rx approval)"] },
-  { email: "manager@plus2pharmacy.com", password: "Staff1234!", staffId: "STF-0018", name: "Michael Pretorius", role: "store_manager", roleLabel: "Store Manager", branch: "Sandton Branch", access: ["Products", "Inventory", "Sales", "Expenses", "Reports"] },
-  { email: "dispatcher@plus2pharmacy.com", password: "Staff1234!", staffId: "STF-0073", name: "Lungelo Zulu", role: "dispatcher", roleLabel: "Delivery Dispatcher", branch: "Sandton Branch", access: ["Delivery management"] },
-  { email: "cashier@plus2pharmacy.com", password: "Staff1234!", staffId: "STF-0091", name: "Kefilwe Sithole", role: "cashier", roleLabel: "Cashier", branch: "Sandton Branch", access: ["Sales", "Orders (view)"] },
-  { email: "inventory@plus2pharmacy.com", password: "Staff1234!", staffId: "STF-0056", name: "Sipho Mahlangu", role: "inventory_clerk", roleLabel: "Inventory Clerk", branch: "Sandton Branch", access: ["Inventory", "Stock take", "POs"] },
+  { email: "sysadmin@plus2pharmacy.co.zw", password: "SysAdmin1234!", staffId: "STF-0000", name: "Tendai Moyo", role: "system_admin", roleLabel: "Systems Administrator", branch: "Head Office — Harare", access: ["User management", "Password resets", "Audit logs", "System settings", "All modules"] },
+  { email: "admin@plus2pharmacy.co.zw", password: "Admin1234!", staffId: "STF-0001", name: "Rumbidzai Chigumba", role: "super_admin", roleLabel: "Super Admin", branch: "Head Office — Harare", access: ["All modules"] },
+  { email: "pharmacist@plus2pharmacy.co.zw", password: "Staff1234!", staffId: "STF-0042", name: "Dr. Aisha Moosa (B.Pharm)", role: "pharmacist", roleLabel: "Pharmacist", branch: "Harare CBD Branch", access: ["Prescriptions", "Orders (Rx approval)"] },
+  { email: "manager@plus2pharmacy.co.zw", password: "Staff1234!", staffId: "STF-0018", name: "Michael Pretorius", role: "store_manager", roleLabel: "Store Manager", branch: "Harare CBD Branch", access: ["Products", "Inventory", "Sales", "Expenses", "Reports"] },
+  { email: "dispatcher@plus2pharmacy.co.zw", password: "Staff1234!", staffId: "STF-0073", name: "Lungelo Zulu", role: "dispatcher", roleLabel: "Delivery Dispatcher", branch: "Harare CBD Branch", access: ["Delivery management"] },
+  { email: "cashier@plus2pharmacy.co.zw", password: "Staff1234!", staffId: "STF-0091", name: "Kefilwe Sithole", role: "cashier", roleLabel: "Cashier", branch: "Harare CBD Branch", access: ["Sales", "Orders (view)"] },
+  { email: "inventory@plus2pharmacy.co.zw", password: "Staff1234!", staffId: "STF-0056", name: "Sipho Mahlangu", role: "inventory_clerk", roleLabel: "Inventory Clerk", branch: "Harare CBD Branch", access: ["Inventory", "Stock take", "POs"] },
 ];
 
 export const ROLE_BADGE_BG: Record<StaffRole, string> = {
   super_admin: "#7C3AED",
+  system_admin: "#DC2626",
   pharmacist: "#0EA5E9",
   store_manager: "#00853F",
   dispatcher: "#F59E0B",
