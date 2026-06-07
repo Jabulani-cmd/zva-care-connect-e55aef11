@@ -26,11 +26,11 @@ function AuthPage() {
       <div className="hidden flex-col justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-dark p-10 text-primary-foreground shadow-xl lg:flex">
         <Logo className="[&_*]:!text-white" />
         <h2 className="mt-8 text-3xl font-extrabold leading-tight">Your health, one tap away.</h2>
-        <p className="mt-3 text-white/90">Manage prescriptions, track deliveries, earn points and shop the full pharmacy from anywhere.</p>
+        <p className="mt-3 text-white/90">Manage prescriptions, track deliveries and shop the full pharmacy from anywhere in Zimbabwe.</p>
         <ul className="mt-8 space-y-3 text-sm">
-          <li className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-accent" /> Secure SA-hosted account</li>
-          <li className="flex items-start gap-3"><Truck className="mt-0.5 h-5 w-5 text-accent" /> Free same-day delivery on orders over R500</li>
-          <li className="flex items-start gap-3"><Sparkles className="mt-0.5 h-5 w-5 text-accent" /> Earn Plus2 Benefit points on every purchase</li>
+          <li className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-white" /> Secure, encrypted account</li>
+          <li className="flex items-start gap-3"><Truck className="mt-0.5 h-5 w-5 text-white" /> Free same-day delivery on orders over US$50</li>
+          <li className="flex items-start gap-3"><Sparkles className="mt-0.5 h-5 w-5 text-white" /> Registered pharmacists available online</li>
         </ul>
         <div className="mt-10 rounded-lg border border-white/20 bg-white/10 p-4 text-sm backdrop-blur">
           <div className="font-bold">Demo account</div>
@@ -116,7 +116,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={submit} className="space-y-4">
       <h1 className="text-2xl font-extrabold">Create your account</h1>
-      <p className="-mt-2 text-sm text-muted-foreground">Get 250 welcome points instantly.</p>
+      <p className="-mt-2 text-sm text-muted-foreground">Join thousands of Zimbabwean families who trust Plus2.</p>
       <div className="grid grid-cols-2 gap-3">
         <Field label="First name" required value={f.firstName} onChange={(e) => setF({ ...f, firstName: e.target.value })} />
         <Field label="Last name" required value={f.lastName} onChange={(e) => setF({ ...f, lastName: e.target.value })} />
