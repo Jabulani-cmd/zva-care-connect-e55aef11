@@ -73,20 +73,20 @@
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  /* Dis-Chem-inspired palette: deep royal blue primary, golden yellow accent, red sale */
-  --primary: oklch(0.36 0.18 260);            /* #003DA5 royal blue */
+  /* Plus2 brand: fresh green + white */
+  --primary: oklch(0.62 0.17 152);            /* Plus2 green */
   --primary-foreground: oklch(1 0 0);
-  --primary-dark: oklch(0.28 0.17 260);
-  --secondary: oklch(0.96 0.01 260);
-  --secondary-foreground: oklch(0.25 0.12 260);
+  --primary-dark: oklch(0.46 0.15 152);       /* darker green */
+  --secondary: oklch(0.96 0.03 150);
+  --secondary-foreground: oklch(0.32 0.12 152);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.5 0.01 240);
-  --accent: oklch(0.88 0.18 95);              /* #FFD100 golden yellow */
-  --accent-foreground: oklch(0.2 0.05 260);
-  --surface: oklch(0.975 0.005 240);
-  --success: oklch(0.6 0.16 150);
+  --muted-foreground: oklch(0.5 0.01 150);
+  --accent: oklch(0.46 0.15 152);             /* deep green CTA */
+  --accent-foreground: oklch(1 0 0);
+  --surface: oklch(0.975 0.012 150);
+  --success: oklch(0.62 0.17 152);
   --warning: oklch(0.78 0.16 75);
-  --destructive: oklch(0.55 0.24 27);         /* #E30613 sale red */
+  --destructive: oklch(0.55 0.24 27);         /* sale red, retained */
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);

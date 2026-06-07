@@ -1,9 +1,10 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Search, Heart, ShoppingCart, User, Menu, MapPin, Phone, HelpCircle, ChevronDown, Truck } from "lucide-react";
+import { Search, Heart, ShoppingCart, User, Menu, MapPin, Phone, HelpCircle, ChevronDown, Truck, FileText } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "./Logo";
 import { useShop } from "@/store/shop";
+import { useAuth } from "@/store/auth";
 import { CATEGORIES } from "@/data/categories";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { CartDrawer } from "@/components/cart/CartDrawer";
@@ -11,6 +12,7 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 export function Navbar() {
   const cart = useShop((s) => s.cart);
   const wishlist = useShop((s) => s.wishlist);
+  const user = useAuth((s) => s.user);
   const cartCount = cart.reduce((a, c) => a + c.qty, 0);
   const [q, setQ] = useState("");
   const [cartOpen, setCartOpen] = useState(false);
@@ -34,9 +36,10 @@ export function Navbar() {
           </div>
           <div className="flex items-center gap-5 text-white/85">
             <Link to="/services" className="hover:text-accent">Pharmacy Services</Link>
+            <Link to="/prescriptions" className="flex items-center gap-1 hover:text-accent"><FileText className="h-3.5 w-3.5" /> Upload Script</Link>
             <a href="#" className="flex items-center gap-1 hover:text-accent"><HelpCircle className="h-3.5 w-3.5" /> Help</a>
-            <Link to="/account" className="hover:text-accent">Track Order</Link>
-            <Link to="/account" className="font-semibold hover:text-accent">Sign In / Register</Link>
+            <Link to="/track" className="hover:text-accent">Track Order</Link>
+            <Link to={user ? "/account" : "/auth"} className="font-semibold hover:text-accent">{user ? `Hi, ${user.firstName}` : "Sign In / Register"}</Link>
           </div>
         </div>
       </div>
@@ -54,8 +57,10 @@ export function Navbar() {
                   <span className="text-lg">{c.emoji}</span> {c.name}
                 </Link>
               ))}
+              <Link to="/prescriptions" className="mt-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted">📋 Upload Prescription</Link>
+              <Link to="/track" className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted">🚚 Track Order</Link>
               <Link to="/services" className="mt-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted">Pharmacy Services</Link>
-              <Link to="/account" className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted">My Account</Link>
+              <Link to={user ? "/account" : "/auth"} className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted">{user ? "My Account" : "Sign In / Register"}</Link>
             </div>
           </SheetContent>
         </Sheet>
@@ -77,11 +82,11 @@ export function Navbar() {
         </form>
 
         <div className="ml-auto flex items-center gap-2">
-          <Link to="/account" className="hidden items-center gap-2 rounded-sm px-3 py-2 text-left text-xs hover:bg-muted lg:flex">
+          <Link to={user ? "/account" : "/auth"} className="hidden items-center gap-2 rounded-sm px-3 py-2 text-left text-xs hover:bg-muted lg:flex">
             <User className="h-6 w-6 text-primary" />
             <span className="leading-tight">
-              <span className="block text-[11px] text-muted-foreground">Hello, Guest</span>
-              <span className="block text-sm font-bold text-foreground">Sign in <ChevronDown className="-mt-0.5 inline h-3 w-3" /></span>
+              <span className="block text-[11px] text-muted-foreground">{user ? `Hi, ${user.firstName}` : "Hello, Guest"}</span>
+              <span className="block text-sm font-bold text-foreground">{user ? "My account" : "Sign in"} <ChevronDown className="-mt-0.5 inline h-3 w-3" /></span>
             </span>
           </Link>
           <Link to="/account" className="relative hidden flex-col items-center rounded-md p-2 text-xs hover:bg-muted sm:flex">
