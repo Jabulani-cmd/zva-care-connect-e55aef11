@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/store/auth";
 import { Logo } from "@/components/layout/Logo";
-import { ShieldCheck, Truck, Sparkles } from "lucide-react";
+import { ShieldCheck, Truck, Sparkles, Mail } from "lucide-react";
 
 type Mode = "login" | "register" | "forgot";
 
@@ -23,7 +23,7 @@ function AuthPage() {
 
   return (
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-2 lg:py-14">
-      <div className="hidden flex-col justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-dark p-10 text-primary-foreground shadow-xl lg:flex">
+      <div className="hidden flex-col justify-center rounded-md bg-primary p-10 text-primary-foreground shadow-sm lg:flex">
         <Logo className="[&_*]:!text-white" />
         <h2 className="mt-8 text-3xl font-extrabold leading-tight">Your health, one tap away.</h2>
         <p className="mt-3 text-white/90">Manage prescriptions, track deliveries and shop the full pharmacy from anywhere in Zimbabwe.</p>
@@ -144,7 +144,7 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
   if (sent)
     return (
       <div className="space-y-4 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/15 text-3xl">📧</div>
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-success/15 text-success"><Mail className="h-7 w-7" /></div>
         <h2 className="text-xl font-extrabold">Check your email</h2>
         <p className="text-sm text-muted-foreground">We sent a password reset link to <strong>{email}</strong>.</p>
         <button onClick={onBack} className="rounded-md border border-border px-4 py-2 text-sm font-bold hover:bg-muted">Back to sign in</button>
