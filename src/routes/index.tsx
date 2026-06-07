@@ -10,9 +10,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Plus2 Pharmacy — Your Health, Our Priority" },
-      { name: "description", content: "Shop pharmacy, beauty, baby, vitamins and more. Free delivery over R500 across South Africa." },
+      { name: "description", content: "Shop pharmacy, beauty, baby, vitamins and more. Free delivery over US$30 across Zimbabwe." },
       { property: "og:title", content: "Plus2 Pharmacy" },
-      { property: "og:description", content: "South Africa's trusted pharmacy — quality healthcare for every family." },
+      { property: "og:description", content: "Zimbabwe's trusted pharmacy — quality healthcare for every family." },
     ],
   }),
   component: Home,

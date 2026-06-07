@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useShop, formatZAR } from "@/store/shop";
+import { useShop, formatUSD } from "@/store/shop";
 import { useAuth, type Order } from "@/store/auth";
 import { getProduct } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -84,7 +84,7 @@ function AccountPage() {
                   return (
                     <div className="mt-3 text-sm">
                       <div className="font-bold">{active.id}</div>
-                      <div className="text-muted-foreground">{active.date} · {formatZAR(active.total)}</div>
+                      <div className="text-muted-foreground">{active.date} · {formatUSD(active.total)}</div>
                       <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">{active.status}</span>
                       <Link to="/track" search={{ order: active.id }} className="mt-3 flex items-center gap-1 text-sm font-bold text-primary hover:underline"><Truck className="h-4 w-4" /> Track delivery →</Link>
                     </div>
@@ -119,7 +119,7 @@ function AccountPage() {
                       <td className="px-4 py-3 font-bold">{o.id}</td>
                       <td className="px-4 py-3 text-muted-foreground">{o.date}</td>
                       <td className="px-4 py-3"><StatusPill status={o.status} /></td>
-                      <td className="px-4 py-3 font-bold">{formatZAR(o.total)}</td>
+                      <td className="px-4 py-3 font-bold">{formatUSD(o.total)}</td>
                       <td className="px-4 py-3 text-right"><Link to="/track" search={{ order: o.id }} className="text-sm font-bold text-primary hover:underline">Track →</Link></td>
                     </tr>
                   ))}

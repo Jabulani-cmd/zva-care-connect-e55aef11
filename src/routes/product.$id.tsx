@@ -5,7 +5,7 @@ import { getProduct, PRODUCTS } from "@/data/products";
 import { ProductImage } from "@/components/product/ProductImage";
 import { ProductCard } from "@/components/product/ProductCard";
 import { RatingStars } from "@/components/product/RatingStars";
-import { useShop, formatZAR } from "@/store/shop";
+import { useShop, formatUSD } from "@/store/shop";
 import { Heart, Minus, Plus, ShoppingCart, ChevronRight, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/product/$id")({
@@ -64,10 +64,10 @@ function ProductPage() {
           </div>
 
           <div className="mt-5 flex items-baseline gap-3">
-            <span className="text-4xl font-extrabold text-foreground">{formatZAR(product.price)}</span>
+            <span className="text-4xl font-extrabold text-foreground">{formatUSD(product.price)}</span>
             {product.originalPrice && (
               <>
-                <span className="text-lg text-muted-foreground line-through">{formatZAR(product.originalPrice)}</span>
+                <span className="text-lg text-muted-foreground line-through">{formatUSD(product.originalPrice)}</span>
                 <span className="rounded-md bg-accent px-2 py-1 text-xs font-bold text-accent-foreground">SAVE {product.savePct}%</span>
               </>
             )}
