@@ -282,23 +282,8 @@ function Checkout() {
             </div>
           )}
 
-          {step === 3 && (
-            <div className="py-8 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-success/10 text-4xl"><Sparkles className="h-10 w-10 text-success" /></div>
-              <h2 className="mt-4 text-2xl font-extrabold">Thank you for your order!</h2>
-              <p className="mt-1 text-muted-foreground">A confirmation email is on its way.</p>
-              <div className="mx-auto mt-6 max-w-sm rounded-xl bg-surface p-5 text-left text-sm">
-                <div className="flex justify-between"><span className="text-muted-foreground">Order number</span><span className="font-extrabold">{orderNumber}</span></div>
-                {authRef && <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Payment ref</span><span className="font-mono font-extrabold">{authRef}</span></div>}
-                <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Estimated delivery</span><span className="font-bold">1–2 working days</span></div>
-                <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Total paid</span><span className="font-extrabold">{formatUSD(total)}</span></div>
-                <div className="mt-1 flex justify-between text-xs"><span className="text-muted-foreground">ZIG equivalent</span><span className="font-bold">{formatZIG(total)}</span></div>
-              </div>
-              <div className="mt-6 flex justify-center gap-3">
-                <button className="rounded-md border border-border px-5 py-2.5 font-bold hover:bg-muted">Track Order</button>
-                <Link to="/" className="rounded-md bg-primary px-5 py-2.5 font-bold text-primary-foreground hover:bg-primary-dark">Continue Shopping</Link>
-              </div>
-            </div>
+          {step === 3 && receipt && (
+            <OrderConfirmation receipt={receipt} isCollect={delivery_.method === "collect"} />
           )}
 
           {step < 3 && (
@@ -338,6 +323,8 @@ function Checkout() {
         onClose={() => setSimOpen(false)}
         onSuccess={(ref) => {
           setAuthRef(ref);
+          const r = makeReceipt(ref);
+          setReceipt(r);
           setSimOpen(false);
           clearCart();
           setStep(3);
