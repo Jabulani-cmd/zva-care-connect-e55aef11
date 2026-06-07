@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth, type Order } from "@/store/auth";
 import { formatUSD } from "@/store/shop";
-import { Search, MapPin, Phone, Truck, Package, CheckCircle2, Circle } from "lucide-react";
+import { Search, MapPin, Phone, Truck, CheckCircle2, Circle, Navigation } from "lucide-react";
 
 export const Route = createFileRoute("/track")({
   validateSearch: (s: Record<string, unknown>) => ({ order: typeof s.order === "string" ? s.order : "" }),
@@ -135,13 +135,100 @@ function OrderTracker({ order }: { order: Order }) {
               </div>
               <a href={`tel:${order.driver.phone}`} className="rounded-md bg-primary p-2 text-primary-foreground hover:bg-primary-dark" aria-label="Call driver"><Phone className="h-4 w-4" /></a>
             </div>
-            <div className="mt-4 flex h-32 items-center justify-center rounded-md border border-border bg-surface text-xs font-semibold text-muted-foreground">
-              Live map (demo)
-            </div>
+            <LiveMap status={order.status} />
           </div>
         )}
         <Link to="/account" className="block rounded-xl border border-border bg-card p-4 text-center text-sm font-bold text-primary hover:bg-muted">View all orders →</Link>
       </aside>
+    </div>
+  );
+}
+
+function LiveMap({ status }: { status: Order["status"] }) {
+  // Animated driver moves along a path from origin (pharmacy) to destination (home).
+  // Progress maps to order status, with a gentle live wiggle for demo purposes.
+  const baseProgress =
+    status === "Delivered" ? 1 :
+    status === "Out for delivery" ? 0.65 :
+    status === "Packed" ? 0.25 : 0.05;
+
+  const [t, setT] = useState(baseProgress);
+  useEffect(() => {
+    if (status === "Delivered") { setT(1); return; }
+    let raf = 0;
+    const start = performance.now();
+    const loop = (now: number) => {
+      const elapsed = (now - start) / 1000;
+      // oscillate ±0.04 around base to feel "live"
+      const wig = Math.sin(elapsed * 0.8) * 0.04;
+      setT(Math.max(0.02, Math.min(0.98, baseProgress + wig)));
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [baseProgress, status]);
+
+  // Cubic bezier path from pharmacy (20,170) to home (280,40)
+  const p0 = { x: 20, y: 170 };
+  const p1 = { x: 110, y: 30 };
+  const p2 = { x: 200, y: 200 };
+  const p3 = { x: 280, y: 40 };
+  const bezier = (a: number, b: number, c: number, d: number) =>
+    (1 - t) ** 3 * a + 3 * (1 - t) ** 2 * t * b + 3 * (1 - t) * t ** 2 * c + t ** 3 * d;
+  const dx = bezier(p0.x, p1.x, p2.x, p3.x);
+  const dy = bezier(p0.y, p1.y, p2.y, p3.y);
+
+  const eta = status === "Delivered" ? "Delivered" :
+    status === "Out for delivery" ? `${Math.max(1, Math.round((1 - t) * 18))} min away` :
+    status === "Packed" ? "Preparing dispatch" : "Awaiting handover";
+
+  return (
+    <div className="mt-4 overflow-hidden rounded-md border border-border">
+      <div className="relative h-44 w-full bg-[oklch(0.96_0.02_150)]">
+        <svg viewBox="0 0 300 220" className="absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-hidden>
+          {/* grid blocks */}
+          <defs>
+            <pattern id="streets" width="40" height="40" patternUnits="userSpaceOnUse">
+              <rect width="40" height="40" fill="oklch(0.97 0.015 150)" />
+              <path d="M0 20 H40 M20 0 V40" stroke="oklch(0.88 0.02 150)" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="300" height="220" fill="url(#streets)" />
+          {/* main avenues */}
+          <path d="M0 110 H300" stroke="oklch(0.82 0.02 150)" strokeWidth="6" />
+          <path d="M150 0 V220" stroke="oklch(0.82 0.02 150)" strokeWidth="6" />
+          {/* route */}
+          <path
+            d={`M${p0.x} ${p0.y} C ${p1.x} ${p1.y}, ${p2.x} ${p2.y}, ${p3.x} ${p3.y}`}
+            stroke="var(--primary)"
+            strokeWidth="3"
+            strokeDasharray="6 4"
+            fill="none"
+          />
+          {/* origin */}
+          <circle cx={p0.x} cy={p0.y} r="6" fill="white" stroke="var(--primary)" strokeWidth="2" />
+          {/* destination */}
+          <circle cx={p3.x} cy={p3.y} r="8" fill="var(--accent)" />
+          <circle cx={p3.x} cy={p3.y} r="3" fill="white" />
+        </svg>
+        {/* driver pin */}
+        <div
+          className="absolute -translate-x-1/2 -translate-y-1/2 transition-[left,top] duration-700 ease-out"
+          style={{ left: `${(dx / 300) * 100}%`, top: `${(dy / 220) * 100}%` }}
+        >
+          <span className="absolute inset-0 -z-10 m-auto block h-8 w-8 animate-ping rounded-full bg-primary/40" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-2 ring-white">
+            <Navigation className="h-4 w-4" />
+          </div>
+        </div>
+        {/* legend */}
+        <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-foreground shadow">Live</div>
+        <div className="absolute bottom-2 right-2 rounded-md bg-white/90 px-2 py-1 text-[11px] font-bold text-foreground shadow">{eta}</div>
+      </div>
+      <div className="flex items-center justify-between gap-2 bg-card px-3 py-2 text-[11px] text-muted-foreground">
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-primary" /> Pharmacy</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-accent" /> Your address</span>
+      </div>
     </div>
   );
 }
