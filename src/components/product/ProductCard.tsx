@@ -1,8 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Heart, ShoppingCart, Pill } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/data/products";
 import { useShop, formatUSD } from "@/store/shop";
+import { useAuth } from "@/store/auth";
 import { ProductImage } from "./ProductImage";
 import { RatingStars } from "./RatingStars";
 
@@ -10,6 +11,9 @@ export function ProductCard({ product }: { product: Product }) {
   const addToCart = useShop((s) => s.addToCart);
   const toggleWishlist = useShop((s) => s.toggleWishlist);
   const wished = useShop((s) => s.wishlist.includes(product.id));
+  const user = useAuth((s) => s.user);
+  const navigate = useNavigate();
+  const location = useRouterState({ select: (s) => s.location });
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-lg border border-[#E5E7EB] bg-white transition duration-200 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
@@ -44,7 +48,15 @@ export function ProductCard({ product }: { product: Product }) {
           {product.originalPrice && <span className="text-[13px] text-[#9CA3AF] line-through">{formatUSD(product.originalPrice)}</span>}
         </div>
         <button
-          onClick={() => { addToCart(product.id); toast.success("Added to cart"); }}
+          onClick={() => {
+            if (!user) {
+              toast.info("Please sign in to add items to your cart");
+              navigate({ to: "/auth", search: { redirect: location.href } });
+              return;
+            }
+            addToCart(product.id);
+            toast.success("Added to cart");
+          }}
           className="mt-2 flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary text-[13px] font-semibold text-white transition hover:bg-primary-dark active:scale-[0.98]"
         >
           <ShoppingCart className="h-3.5 w-3.5" /> Add to Cart
