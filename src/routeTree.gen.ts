@@ -20,6 +20,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StaffIndexRouteImport } from './routes/staff.index'
 import { Route as StaffLoginRouteImport } from './routes/staff.login'
+import { Route as StaffDashboardRouteImport } from './routes/staff.dashboard'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 
@@ -78,6 +79,11 @@ const StaffLoginRoute = StaffLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => StaffRoute,
 } as any)
+const StaffDashboardRoute = StaffDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => StaffRoute,
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/track': typeof TrackRoute
   '/category/$slug': typeof CategorySlugRoute
   '/product/$id': typeof ProductIdRoute
+  '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/login': typeof StaffLoginRoute
   '/staff/': typeof StaffIndexRoute
 }
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/track': typeof TrackRoute
   '/category/$slug': typeof CategorySlugRoute
   '/product/$id': typeof ProductIdRoute
+  '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/login': typeof StaffLoginRoute
   '/staff': typeof StaffIndexRoute
 }
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/track': typeof TrackRoute
   '/category/$slug': typeof CategorySlugRoute
   '/product/$id': typeof ProductIdRoute
+  '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/login': typeof StaffLoginRoute
   '/staff/': typeof StaffIndexRoute
 }
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/category/$slug'
     | '/product/$id'
+    | '/staff/dashboard'
     | '/staff/login'
     | '/staff/'
   fileRoutesByTo: FileRoutesByTo
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/category/$slug'
     | '/product/$id'
+    | '/staff/dashboard'
     | '/staff/login'
     | '/staff'
   id:
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/category/$slug'
     | '/product/$id'
+    | '/staff/dashboard'
     | '/staff/login'
     | '/staff/'
   fileRoutesById: FileRoutesById
@@ -274,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffLoginRouteImport
       parentRoute: typeof StaffRoute
     }
+    '/staff/dashboard': {
+      id: '/staff/dashboard'
+      path: '/dashboard'
+      fullPath: '/staff/dashboard'
+      preLoaderRoute: typeof StaffDashboardRouteImport
+      parentRoute: typeof StaffRoute
+    }
     '/product/$id': {
       id: '/product/$id'
       path: '/product/$id'
@@ -292,11 +311,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface StaffRouteChildren {
+  StaffDashboardRoute: typeof StaffDashboardRoute
   StaffLoginRoute: typeof StaffLoginRoute
   StaffIndexRoute: typeof StaffIndexRoute
 }
 
 const StaffRouteChildren: StaffRouteChildren = {
+  StaffDashboardRoute: StaffDashboardRoute,
   StaffLoginRoute: StaffLoginRoute,
   StaffIndexRoute: StaffIndexRoute,
 }
@@ -319,3 +340,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
