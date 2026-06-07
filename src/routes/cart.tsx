@@ -5,6 +5,7 @@ import { useShop, formatZAR } from "@/store/shop";
 import { getProduct, PRODUCTS } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Minus, Plus, Trash2, Tag, ShoppingBag } from "lucide-react";
+import { FileText, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "Cart — Plus2 Pharmacy" }] }),
@@ -20,6 +21,7 @@ function CartPage() {
   const [code, setCode] = useState(promoCode);
 
   const items = cart.map((c) => ({ ...c, product: getProduct(c.id)! })).filter((i) => i.product);
+  const hasRx = items.some((i) => i.product.isPrescription);
   const subtotal = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
   const discount = promoCode === "PLUS10" ? subtotal * 0.1 : 0;
   const delivery = subtotal >= 50 ? 0 : subtotal === 0 ? 0 : 5;
@@ -45,6 +47,18 @@ function CartPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
       <h1 className="text-2xl font-extrabold md:text-3xl">Your Cart ({items.length})</h1>
+      {hasRx && (
+        <div className="mt-4 flex items-start gap-3 rounded-md border border-[#FDE68A] bg-[#FEF3C7] p-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#854D0E]" />
+          <div className="flex-1">
+            <div className="text-sm font-semibold text-[#854D0E]">Prescription required</div>
+            <div className="text-xs text-[#854D0E]/90">This order contains prescription items. Please upload your valid script to proceed.</div>
+          </div>
+          <Link to="/prescriptions" className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-[#854D0E] px-3 py-2 text-xs font-semibold text-white hover:bg-[#713F0D]">
+            <FileText className="h-3.5 w-3.5" /> Upload Now
+          </Link>
+        </div>
+      )}
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
         <ul className="space-y-3">
           {items.map((i) => (

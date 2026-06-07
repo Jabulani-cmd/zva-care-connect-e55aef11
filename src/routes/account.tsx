@@ -74,7 +74,7 @@ function AccountPage() {
                   <div><span className="text-muted-foreground">Email:</span> <strong>{user.email}</strong></div>
                   {user.phone && <div className="flex items-center gap-1.5"><Phone className="h-3 w-3 text-muted-foreground" /> <strong>{user.phone}</strong></div>}
                 </div>
-                <Link to="/prescriptions" className="mt-4 inline-block rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase text-primary-foreground hover:bg-primary-dark">+ Upload script</Link>
+                <Link to="/prescriptions" className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase text-primary-foreground hover:bg-primary-dark"><FileText className="h-3.5 w-3.5" /> Upload a new prescription</Link>
               </div>
               <div className="rounded-xl border border-border bg-card p-5">
                 <h3 className="font-extrabold">Active delivery</h3>

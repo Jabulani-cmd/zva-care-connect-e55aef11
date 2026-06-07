@@ -28,12 +28,20 @@ export function HeroCarousel() {
               <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#86EFAC]">{s.eyebrow}</p>
               <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight md:text-[40px]">{s.headline}</h1>
               <p className="mt-3 text-sm text-white/90 md:text-base">{s.subtext}</p>
-              <Link
-                to={s.href}
-                className="mt-6 inline-flex items-center rounded-md bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark"
-              >
-                {s.cta}
-              </Link>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  to={s.href}
+                  className="inline-flex items-center rounded-md bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark"
+                >
+                  {s.cta}
+                </Link>
+                <Link
+                  to="/prescriptions"
+                  className="inline-flex items-center rounded-md border border-white/80 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white hover:text-primary"
+                >
+                  Upload a Prescription
+                </Link>
+              </div>
             </div>
           </div>
         </motion.div>
