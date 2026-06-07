@@ -3,7 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useShop, formatUSD, formatZIG } from "@/store/shop";
 import { getProduct } from "@/data/products";
-import { Check, CreditCard, Truck, MapPin, Sparkles, Smartphone, Building2, Banknote, Eye, EyeOff } from "lucide-react";
+import { Check, CreditCard, Truck, MapPin, Smartphone, Building2, Banknote, Eye, EyeOff } from "lucide-react";
 import { PaymentSimulator, detectBrand, formatCardNumber, formatExpiry } from "@/components/checkout/PaymentSimulator";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
 import { buildReceipt, type Receipt } from "@/lib/receipts";
