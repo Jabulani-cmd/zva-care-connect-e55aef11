@@ -1,0 +1,46 @@
+export type Product = {
+  id: string;
+  name: string;
+  brand: string;
+  category: string;
+  price: number;
+  originalPrice?: number;
+  savePct?: number;
+  rating: number;
+  reviewCount: number;
+  stock: "in" | "low" | "out";
+  emoji: string;
+  bg: string;
+  shortDesc: string;
+  longDesc: string;
+  ingredients: string;
+  howToUse: string;
+  isPrescription?: boolean;
+  featured?: boolean;
+  flashDeal?: boolean;
+};
+
+export const PRODUCTS: Product[] = [
+  { id: "panado", name: "Panado 500mg Tablets 24's", brand: "Panado", category: "pharmacy", price: 29.99, originalPrice: 35.29, savePct: 15, rating: 4.7, reviewCount: 412, stock: "in", emoji: "💊", bg: "oklch(0.95 0.04 150)", shortDesc: "Effective pain & fever relief", longDesc: "Panado provides fast, gentle relief from headaches, muscle aches, period pain and fever. Suitable for adults and children over 12.", ingredients: "Paracetamol 500mg per tablet.", howToUse: "Adults: 1-2 tablets every 4-6 hours. Do not exceed 8 tablets in 24 hours.", featured: true, flashDeal: true },
+  { id: "allergex", name: "Allergex 10mg Tablets 30's", brand: "Allergex", category: "pharmacy", price: 54.99, rating: 4.5, reviewCount: 198, stock: "in", emoji: "💊", bg: "oklch(0.94 0.05 200)", shortDesc: "Fast hay fever & allergy relief", longDesc: "Non-drowsy antihistamine that relieves the symptoms of hay fever, allergic rhinitis and chronic urticaria.", ingredients: "Cetirizine hydrochloride 10mg.", howToUse: "Adults & children over 12: 1 tablet daily." },
+  { id: "bioplus", name: "Bioplus Original Energy Drink 6-pack", brand: "Bioplus", category: "vitamins", price: 89.99, rating: 4.6, reviewCount: 523, stock: "in", emoji: "⚡", bg: "oklch(0.92 0.12 75)", shortDesc: "B-vitamins for everyday energy", longDesc: "A delicious lemon-flavoured tonic that helps reduce tiredness and supports a healthy nervous system.", ingredients: "Vitamins B1, B2, B3, B5, B6, B12.", howToUse: "Drink 1 bottle in the morning.", featured: true },
+  { id: "vitaforce", name: "Vitaforce Multivitamin 60 Caps", brand: "Vitaforce", category: "vitamins", price: 149.99, originalPrice: 187.49, savePct: 20, rating: 4.8, reviewCount: 891, stock: "in", emoji: "💪", bg: "oklch(0.93 0.1 130)", shortDesc: "Complete daily multivitamin", longDesc: "26 essential vitamins and minerals to support immunity, energy and overall wellbeing.", ingredients: "Vitamins A, C, D, E, B-complex, Zinc, Iron, Magnesium.", howToUse: "Take 1 capsule daily with food.", featured: true, flashDeal: true },
+  { id: "dove", name: "Dove Body Wash Sensitive 500ml", brand: "Dove", category: "beauty", price: 79.99, rating: 4.6, reviewCount: 312, stock: "in", emoji: "🧴", bg: "oklch(0.94 0.03 280)", shortDesc: "Gentle cleansing for sensitive skin", longDesc: "Dermatologically tested body wash with ¼ moisturising cream for soft, smooth skin.", ingredients: "Hypoallergenic, fragrance-free formula.", howToUse: "Apply to wet skin, lather and rinse." },
+  { id: "neutrogena", name: "Neutrogena Hydro Boost Moisturiser", brand: "Neutrogena", category: "beauty", price: 229.99, rating: 4.7, reviewCount: 654, stock: "low", emoji: "💧", bg: "oklch(0.93 0.07 220)", shortDesc: "Hyaluronic acid water gel", longDesc: "Quenches dry skin and locks in hydration for 48 hours. Non-comedogenic.", ingredients: "Hyaluronic acid, glycerin.", howToUse: "Apply morning and night to clean skin." },
+  { id: "huggies", name: "Huggies Gold Newborn Nappies 80's", brand: "Huggies", category: "baby", price: 349.99, rating: 4.9, reviewCount: 1432, stock: "in", emoji: "👶", bg: "oklch(0.94 0.06 50)", shortDesc: "Up to 12-hour leak protection", longDesc: "Soft cottony cover with DryTouch core for newborn comfort.", ingredients: "Hypoallergenic materials.", howToUse: "Change every 2-3 hours.", featured: true },
+  { id: "lennon", name: "Lennon Wonderkruid 100ml", brand: "Lennon", category: "pharmacy", price: 59.99, rating: 4.4, reviewCount: 287, stock: "in", emoji: "🌿", bg: "oklch(0.93 0.09 140)", shortDesc: "Traditional herbal remedy", longDesc: "Time-honoured South African herbal tincture used for digestive and respiratory comfort.", ingredients: "Aromatic herbal extracts.", howToUse: "5-10 drops in water as needed." },
+  { id: "usn", name: "USN Whey Protein 1kg Vanilla", brand: "USN", category: "sports", price: 499.99, originalPrice: 555.54, savePct: 10, rating: 4.6, reviewCount: 723, stock: "in", emoji: "🏋️", bg: "oklch(0.92 0.08 30)", shortDesc: "24g protein per serving", longDesc: "Premium whey protein blend for muscle recovery and lean growth.", ingredients: "Whey protein concentrate & isolate.", howToUse: "Mix 1 scoop with 250ml water or milk after training.", flashDeal: true },
+  { id: "himalaya", name: "Himalaya Liv.52 Tablets 100's", brand: "Himalaya", category: "vitamins", price: 179.99, rating: 4.7, reviewCount: 412, stock: "in", emoji: "🌱", bg: "oklch(0.94 0.08 145)", shortDesc: "Liver health support", longDesc: "Ayurvedic blend that supports liver function and detoxification.", ingredients: "Capers, Chicory, Black nightshade.", howToUse: "2 tablets twice daily." },
+  { id: "johnsons", name: "Johnson's Baby Shampoo 500ml", brand: "Johnson's", category: "baby", price: 69.99, rating: 4.8, reviewCount: 934, stock: "in", emoji: "🧴", bg: "oklch(0.95 0.06 80)", shortDesc: "No more tears formula", longDesc: "Gentle enough for everyday use on baby's delicate hair and scalp.", ingredients: "Mild cleansing agents.", howToUse: "Apply to wet hair, lather, rinse." },
+  { id: "natio", name: "Natio Rosehip Oil 30ml", brand: "Natio", category: "beauty", price: 199.99, rating: 4.5, reviewCount: 189, stock: "in", emoji: "🌹", bg: "oklch(0.93 0.09 25)", shortDesc: "Nourishing facial oil", longDesc: "Cold-pressed rosehip oil rich in essential fatty acids and antioxidants.", ingredients: "100% pure rosehip oil.", howToUse: "Apply 2-3 drops to face nightly." },
+  { id: "rennies", name: "Rennies Antacid Tablets 24's", brand: "Rennies", category: "pharmacy", price: 34.99, rating: 4.6, reviewCount: 356, stock: "in", emoji: "💊", bg: "oklch(0.94 0.05 180)", shortDesc: "Fast heartburn relief", longDesc: "Chewable antacid that neutralises excess stomach acid.", ingredients: "Calcium carbonate, magnesium carbonate.", howToUse: "Chew 1-2 tablets when needed." },
+  { id: "oralb", name: "Oral-B Electric Toothbrush", brand: "Oral-B", category: "personal", price: 549.99, originalPrice: 733.32, savePct: 25, rating: 4.7, reviewCount: 612, stock: "low", emoji: "🪥", bg: "oklch(0.93 0.07 220)", shortDesc: "2-min smart timer", longDesc: "Rechargeable electric toothbrush with rotating-oscillating action.", ingredients: "Round brush head.", howToUse: "Brush for 2 minutes, twice daily.", flashDeal: true, featured: true },
+  { id: "nurofen", name: "Nurofen 200mg Caplets 24's", brand: "Nurofen", category: "pharmacy", price: 44.99, rating: 4.7, reviewCount: 521, stock: "in", emoji: "💊", bg: "oklch(0.94 0.08 30)", shortDesc: "Targeted pain relief", longDesc: "Ibuprofen-based relief for headaches, back pain and inflammation.", ingredients: "Ibuprofen 200mg.", howToUse: "1-2 caplets every 4-6 hours with food." },
+  { id: "herbalife", name: "Herbalife Formula 1 Shake 550g", brand: "Herbalife", category: "sports", price: 649.99, rating: 4.4, reviewCount: 234, stock: "in", emoji: "🥤", bg: "oklch(0.93 0.1 60)", shortDesc: "Balanced meal replacement", longDesc: "Nutritious shake mix with 21 vitamins and minerals.", ingredients: "Soy protein, vitamins, minerals.", howToUse: "Blend 2 scoops with 250ml low-fat milk." },
+  { id: "pampers", name: "Pampers Active Baby Size 3", brand: "Pampers", category: "baby", price: 249.99, rating: 4.8, reviewCount: 1102, stock: "in", emoji: "👶", bg: "oklch(0.94 0.06 320)", shortDesc: "12hr dryness, 3 absorbing channels", longDesc: "Soft, breathable nappies with extra absorbency.", ingredients: "Hypoallergenic core.", howToUse: "Change every 3 hours." },
+  { id: "biooil", name: "Bio-Oil Skincare Oil 125ml", brand: "Bio-Oil", category: "beauty", price: 179.99, originalPrice: 199.99, savePct: 10, rating: 4.6, reviewCount: 845, stock: "in", emoji: "✨", bg: "oklch(0.93 0.09 50)", shortDesc: "Scars, stretch marks, uneven tone", longDesc: "Specialist skincare oil clinically proven to improve appearance of scars and stretch marks.", ingredients: "PurCellin Oil, vitamins A & E.", howToUse: "Massage into skin twice daily." },
+  { id: "caltrate", name: "Caltrate Calcium 600mg 60 Tabs", brand: "Caltrate", category: "vitamins", price: 99.99, rating: 4.5, reviewCount: 298, stock: "in", emoji: "🦴", bg: "oklch(0.95 0.03 80)", shortDesc: "Bone & joint support", longDesc: "Calcium with Vitamin D3 for healthy bones and teeth.", ingredients: "Calcium carbonate 600mg, Vitamin D3.", howToUse: "1 tablet twice daily with meals." },
+  { id: "dettol", name: "Dettol Antiseptic Liquid 750ml", brand: "Dettol", category: "household", price: 64.99, rating: 4.8, reviewCount: 712, stock: "in", emoji: "🧼", bg: "oklch(0.94 0.08 145)", shortDesc: "Trusted antiseptic protection", longDesc: "Multi-purpose disinfectant for cuts, laundry and surfaces.", ingredients: "Chloroxylenol 4.8%.", howToUse: "Dilute as directed on label." },
+];
+
+export const getProduct = (id: string) => PRODUCTS.find((p) => p.id === id);
