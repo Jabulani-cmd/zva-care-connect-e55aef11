@@ -19,13 +19,19 @@ const ACCEPTED = "image/jpeg,image/png,image/heic,image/heif,application/pdf";
 
 type LocalFile = { id: string; file: File; preview?: string; error?: string };
 
+// ---- Detect mobile device ----
+const isMobileDevice = () =>
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 function PrescriptionsPage() {
   const user = useAuth((s) => s.user);
   const addPrescription = useAuth((s) => s.addPrescription);
   const prescriptions = useAuth((s) => s.prescriptions);
   const navigate = useNavigate();
 
-  useEffect(() => { if (!user) navigate({ to: "/auth" }); }, [user, navigate]);
+  useEffect(() => {
+    if (!user) navigate({ to: "/auth" });
+  }, [user, navigate]);
   if (!user) return null;
 
   return (
@@ -38,8 +44,8 @@ function PrescriptionsPage() {
           Upload Your Prescription
         </h1>
         <p className="mt-1 text-sm text-[#6B7280]">
-          A registered Plus2 pharmacist will review your script within 2 hours
-          (Mon–Sat 8am–6pm).
+          A registered Plus2 pharmacist will review your script
+          within 2 hours (Mon–Sat 8am–6pm).
         </p>
       </div>
       <UploadWizard onSubmit={addPrescription} />
@@ -69,7 +75,9 @@ function UploadWizard({
   const [notes, setNotes] = useState("");
 
   // step 3
-  const [delivery, setDelivery] = useState<"delivery" | "collect">("delivery");
+  const [delivery, setDelivery] = useState
+    "delivery" | "collect"
+  >("delivery");
 
   // step 4
   const [confirm, setConfirm] = useState(false);
@@ -81,18 +89,25 @@ function UploadWizard({
   const [showPayment, setShowPayment] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [paymentRef, setPaymentRef] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState
+    string | null
+  >(null);
 
   const validFiles = files.filter((f) => !f.error);
   const canNext1 = validFiles.length > 0;
   const canNext2 =
-    (forSelf || patient.trim().length > 0) && scriptDate.length > 0;
+    (forSelf || patient.trim().length > 0) &&
+    scriptDate.length > 0;
   const canSubmit = confirm;
 
   const goNext = () =>
-    setStep((s) => (s < 5 ? ((s + 1) as 1 | 2 | 3 | 4 | 5) : s));
+    setStep((s) =>
+      s < 5 ? ((s + 1) as 1 | 2 | 3 | 4 | 5) : s
+    );
   const goBack = () =>
-    setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3 | 4 | 5) : s));
+    setStep((s) =>
+      s > 1 ? ((s - 1) as 1 | 2 | 3 | 4 | 5) : s
+    );
 
   const submit = () => {
     const id = onSubmit({
@@ -114,7 +129,9 @@ function UploadWizard({
       delivery,
     });
     setPendingId(id);
-    toast.success("Prescription submitted — please complete payment");
+    toast.success(
+      "Prescription submitted — please complete payment"
+    );
     setShowPayment(true);
   };
 
@@ -229,14 +246,20 @@ function UploadWizard({
           isOpen={showPayment}
           onClose={() => setShowPayment(false)}
           onSuccess={handlePaymentSuccess}
-          amount={delivery === "delivery" ? 15.00 : 10.00}
+          amount={delivery === "delivery" ? 15.0 : 10.0}
           orderId={pendingId ?? "P2-NEW"}
           rxRef={pendingId ?? undefined}
           orderType="Prescription"
           itemSummary={
             `Prescription medication · ` +
-            `${validFiles.length} script file${validFiles.length !== 1 ? "s" : ""} · ` +
-            `${delivery === "delivery" ? "Home Delivery" : "Collect in-store"}`
+            `${validFiles.length} script file${
+              validFiles.length !== 1 ? "s" : ""
+            } · ` +
+            `${
+              delivery === "delivery"
+                ? "Home Delivery"
+                : "Collect in-store"
+            }`
           }
         />
       )}
@@ -256,14 +279,16 @@ function Stepper({ step }: { step: number }) {
           <div key={l} className="flex flex-1 items-center gap-2">
             <div
               className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-                done
-                  ? "bg-primary text-white"
-                  : active
+                done || active
                   ? "bg-primary text-white"
                   : "bg-[#E5E7EB] text-[#6B7280]"
               }`}
             >
-              {done ? <CheckCircle2 className="h-4 w-4" /> : idx}
+              {done ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : (
+                idx
+              )}
             </div>
             <span
               className={`hidden text-[11px] font-semibold uppercase tracking-wide md:inline ${
@@ -301,6 +326,7 @@ function Step1Files({
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const cloudRef = useRef<HTMLInputElement>(null);
+  const isMobile = isMobileDevice();
 
   const hasHeic = useMemo(
     () =>
@@ -322,8 +348,14 @@ function Step1Files({
         break;
       }
       const error =
-        f.size > MAX_BYTES ? "File too large — max 10MB" : undefined;
-      const local: LocalFile = { id: crypto.randomUUID(), file: f, error };
+        f.size > MAX_BYTES
+          ? "File too large — max 10MB"
+          : undefined;
+      const local: LocalFile = {
+        id: crypto.randomUUID(),
+        file: f,
+        error,
+      };
       if (!error && f.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onload = () => {
@@ -358,19 +390,66 @@ function Step1Files({
         </p>
       </div>
 
+      {/* Desktop notice */}
+      {!isMobile && (
+        <div
+          className="flex items-start gap-3 rounded-lg p-3
+            text-sm"
+          style={{
+            background: "#EFF6FF",
+            border: "1px solid #BFDBFE",
+          }}
+        >
+          <span className="mt-0.5 text-base">💡</span>
+          <span className="text-[#1E40AF]">
+            <strong>On a desktop?</strong> Use "Choose from
+            Gallery or Files" or drag and drop below. The camera
+            option is only available on mobile devices (Android
+            or iPhone).
+          </span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        {/* Card 1 — Take a Photo */}
         <MethodCard
           icon={Camera}
           title="Take a Photo"
-          subtitle="Use your phone or webcam to photograph your script"
-          onClick={() => cameraRef.current?.click()}
+          subtitle={
+            isMobile
+              ? "Open your camera to photograph your script directly"
+              : "Available on mobile devices only"
+          }
+          onClick={() => {
+            if (isMobile) {
+              cameraRef.current?.click();
+            } else {
+              toast.info(
+                "Camera capture is only available on mobile devices. Please use the file picker instead."
+              );
+            }
+          }}
+          disabled={!isMobile}
+          badge={
+            isMobile ? undefined : "Mobile only"
+          }
+          badgeColor={
+            isMobile ? undefined : "#854D0E"
+          }
+          badgeBg={
+            isMobile ? undefined : "#FEF9C3"
+          }
         />
+
+        {/* Card 2 — Gallery / Files */}
         <MethodCard
           icon={ImageIcon}
           title="Choose from Gallery or Files"
           subtitle="Select a photo, PDF or image saved on your device"
           onClick={() => galleryRef.current?.click()}
         />
+
+        {/* Card 3 — Email / Cloud */}
         <MethodCard
           icon={Mail}
           title="From Email or Cloud Storage"
@@ -384,6 +463,7 @@ function Step1Files({
         attachment → save to Files first, then return here.
       </p>
 
+      {/* Drag and drop — desktop only */}
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -420,6 +500,7 @@ function Step1Files({
         </div>
       </div>
 
+      {/* Hidden inputs */}
       <input
         ref={cameraRef}
         type="file"
@@ -455,6 +536,7 @@ function Step1Files({
         </div>
       )}
 
+      {/* File previews */}
       {files.length > 0 && (
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -462,7 +544,9 @@ function Step1Files({
               <div
                 key={f.id}
                 className={`relative aspect-square overflow-hidden rounded-lg border bg-[#F9FAFB] ${
-                  f.error ? "border-[#DC2626]" : "border-[#E5E7EB]"
+                  f.error
+                    ? "border-[#DC2626]"
+                    : "border-[#E5E7EB]"
                 }`}
               >
                 {f.preview ? (
@@ -506,8 +590,9 @@ function Step1Files({
               <Plus className="h-3.5 w-3.5" /> Add Another Script
             </button>
             <span>
-              {files.length} file{files.length !== 1 ? "s" : ""}{" "}
-              selected (max {MAX_FILES}) · Total: {totalMB} MB
+              {files.length} file
+              {files.length !== 1 ? "s" : ""} selected (max{" "}
+              {MAX_FILES}) · Total: {totalMB} MB
             </span>
           </div>
         </div>
@@ -521,36 +606,80 @@ function Step1Files({
   );
 }
 
+// ---------- Method Card ----------
 function MethodCard({
   icon: Icon,
   title,
   subtitle,
   onClick,
+  disabled = false,
+  badge,
+  badgeColor,
+  badgeBg,
 }: {
   icon: typeof Camera;
   title: string;
   subtitle: string;
   onClick: () => void;
+  disabled?: boolean;
+  badge?: string;
+  badgeColor?: string;
+  badgeBg?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-4 rounded-lg border border-[#E5E7EB] bg-white px-5 py-4 text-left transition hover:border-primary hover:bg-[#F9FAFB]"
+      className={`flex w-full items-center gap-4 rounded-lg
+        border px-5 py-4 text-left transition
+        ${
+          disabled
+            ? "cursor-default border-[#E5E7EB] bg-[#F9FAFB] opacity-60"
+            : "border-[#E5E7EB] bg-white hover:border-primary hover:bg-[#F9FAFB]"
+        }`}
       style={{ minHeight: 80 }}
     >
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#F0F9F4] text-primary">
-        <Icon className="h-7 w-7" />
+      <span
+        className={`flex h-12 w-12 shrink-0 items-center
+          justify-center rounded-lg
+          ${disabled ? "bg-[#F3F4F6]" : "bg-[#F0F9F4]"}
+          text-primary`}
+      >
+        <Icon
+          className={`h-7 w-7 ${
+            disabled ? "text-[#9CA3AF]" : "text-primary"
+          }`}
+        />
       </span>
       <span className="flex-1">
-        <span className="block text-[15px] font-semibold text-[#111827]">
+        <span
+          className={`block text-[15px] font-semibold ${
+            disabled ? "text-[#6B7280]" : "text-[#111827]"
+          }`}
+        >
           {title}
         </span>
         <span className="block text-[12px] text-[#6B7280]">
           {subtitle}
         </span>
+        {badge && (
+          <span
+            className="mt-1 inline-block rounded-full px-2
+              py-0.5 text-[10px] font-semibold"
+            style={{
+              background: badgeBg ?? "#F3F4F6",
+              color: badgeColor ?? "#374151",
+            }}
+          >
+            {badge}
+          </span>
+        )}
       </span>
-      <ChevronRight className="h-[18px] w-[18px] shrink-0 text-[#9CA3AF]" />
+      <ChevronRight
+        className={`h-[18px] w-[18px] shrink-0 ${
+          disabled ? "text-[#D1D5DB]" : "text-[#9CA3AF]"
+        }`}
+      />
     </button>
   );
 }
@@ -597,7 +726,10 @@ function Step2Patient(props: {
           Who is this prescription for?
         </label>
         <div className="grid grid-cols-2 gap-3">
-          <ToggleBtn active={forSelf} onClick={() => setForSelf(true)}>
+          <ToggleBtn
+            active={forSelf}
+            onClick={() => setForSelf(true)}
+          >
             Myself
           </ToggleBtn>
           <ToggleBtn
@@ -621,7 +753,13 @@ function Step2Patient(props: {
             label="Relationship"
             value={relationship}
             onChange={(e) => setRelationship(e.target.value)}
-            options={["Spouse", "Child", "Parent", "Sibling", "Other"]}
+            options={[
+              "Spouse",
+              "Child",
+              "Parent",
+              "Sibling",
+              "Other",
+            ]}
           />
         </div>
       )}
@@ -722,7 +860,9 @@ function ToggleBtn({
 function Field({
   label,
   ...rest
-}: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+}: {
+  label: string;
+} & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[#374151]">
@@ -819,15 +959,18 @@ function DeliveryOption({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-start gap-3 rounded-lg border p-4 text-left transition ${
-        active
-          ? "border-primary bg-[#F0F9F4]"
-          : "border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]"
-      }`}
+      className={`flex items-start gap-3 rounded-lg border
+        p-4 text-left transition ${
+          active
+            ? "border-primary bg-[#F0F9F4]"
+            : "border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]"
+        }`}
     >
       <span
         className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-          active ? "bg-primary text-white" : "bg-[#F0F9F4] text-primary"
+          active
+            ? "bg-primary text-white"
+            : "bg-[#F0F9F4] text-primary"
         }`}
       >
         <Icon className="h-5 w-5" />
@@ -836,7 +979,9 @@ function DeliveryOption({
         <span className="block text-sm font-semibold text-[#111827]">
           {title}
         </span>
-        <span className="block text-xs text-[#6B7280]">{subtitle}</span>
+        <span className="block text-xs text-[#6B7280]">
+          {subtitle}
+        </span>
       </span>
     </button>
   );
@@ -902,13 +1047,17 @@ function Step4Review(props: {
               "For",
               forSelf
                 ? "Myself"
-                : `${patient}${relationship ? ` (${relationship})` : ""}`,
+                : `${patient}${
+                    relationship ? ` (${relationship})` : ""
+                  }`,
             ],
             ["Doctor", doctor || "—"],
             ["Date on script", scriptDate],
             [
               "Repeat",
-              isRepeat ? `Yes (${repeatsLeft} remaining)` : "No",
+              isRepeat
+                ? `Yes (${repeatsLeft} remaining)`
+                : "No",
             ],
           ]}
         />
@@ -932,9 +1081,10 @@ function Step4Review(props: {
       <div className="flex items-start gap-2 rounded-md border border-[#FDE68A] bg-[#FEF3C7] p-3 text-xs text-[#854D0E]">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <span>
-          Important: Ensure your prescription is valid, dated, and
-          signed by a registered healthcare professional. Submitting
-          a forged script is a criminal offence under Zimbabwean law.
+          Important: Ensure your prescription is valid, dated,
+          and signed by a registered healthcare professional.
+          Submitting a forged script is a criminal offence under
+          Zimbabwean law.
         </span>
       </div>
 
@@ -946,8 +1096,8 @@ function Step4Review(props: {
           className="mt-0.5 h-4 w-4 accent-[#00853F]"
         />
         <span className="text-[#374151]">
-          I confirm this is a genuine, valid prescription issued by
-          a registered healthcare professional.
+          I confirm this is a genuine, valid prescription issued
+          by a registered healthcare professional.
         </span>
       </label>
     </div>
@@ -1044,7 +1194,9 @@ function Step5Success({
               key={label}
               className="flex justify-between border-b border-gray-100 py-1.5 last:border-0"
             >
-              <span className="text-xs text-[#6B7280]">{label}</span>
+              <span className="text-xs text-[#6B7280]">
+                {label}
+              </span>
               <span className="text-xs font-semibold text-[#111827]">
                 {value}
               </span>
