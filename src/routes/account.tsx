@@ -5,7 +5,7 @@ import { useShop, formatZAR } from "@/store/shop";
 import { useAuth, type Order } from "@/store/auth";
 import { getProduct } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
-import { Package, Heart, MapPin, Settings, LayoutDashboard, FileText, Truck, LogOut, Phone } from "lucide-react";
+import { Package, Heart, MapPin, Settings, LayoutDashboard, FileText, Truck, LogOut, Phone, Syringe, Store } from "lucide-react";
 
 export const Route = createFileRoute("/account")({
   head: () => ({ meta: [{ title: "My Account — Plus2 Pharmacy" }] }),
@@ -39,14 +39,14 @@ function AccountPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-      <div className="rounded-2xl bg-gradient-to-r from-primary to-primary-dark p-6 text-primary-foreground shadow-lg">
+      <div className="rounded-lg border border-[#E5E7EB] bg-[#F0F9F4] p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <div className="text-xs font-bold uppercase tracking-wider opacity-90">Welcome back</div>
-            <h1 className="mt-1 text-2xl font-extrabold md:text-3xl">Hi, {user.firstName} 👋</h1>
-            <p className="mt-1 text-sm opacity-95">{orders.length} order{orders.length !== 1 ? "s" : ""} · {prescriptions.length} prescription{prescriptions.length !== 1 ? "s" : ""} on file</p>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">My Account</p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#111827] md:text-3xl">Welcome back, {user.firstName}</h1>
+            <p className="mt-1 text-sm text-[#374151]">{orders.length} order{orders.length !== 1 ? "s" : ""} · {prescriptions.length} prescription{prescriptions.length !== 1 ? "s" : ""} on file</p>
           </div>
-          <button onClick={onLogout} className="inline-flex items-center gap-2 rounded-md bg-white/15 px-3 py-1.5 text-xs font-bold backdrop-blur hover:bg-white/25"><LogOut className="h-4 w-4" /> Sign out</button>
+          <button onClick={onLogout} className="inline-flex items-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-xs font-semibold text-[#374151] hover:bg-[#F9FAFB]"><LogOut className="h-4 w-4" /> Sign out</button>
         </div>
       </div>
 
@@ -94,10 +94,10 @@ function AccountPage() {
               <div className="rounded-xl border border-border bg-card p-5 sm:col-span-2">
                 <h3 className="font-extrabold">Quick Links</h3>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <Link to="/prescriptions" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">📋 Upload Script</Link>
-                  <Link to="/track" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">🚚 Track Order</Link>
-                  <Link to="/services" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">💉 Vaccinations</Link>
-                  <Link to="/services" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">📍 Find Store</Link>
+                  <Link to="/prescriptions" className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary"><FileText className="h-4 w-4" /> Upload Script</Link>
+                  <Link to="/track" className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary"><Truck className="h-4 w-4" /> Track Order</Link>
+                  <Link to="/services" className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary"><Syringe className="h-4 w-4" /> Vaccinations</Link>
+                  <Link to="/services" className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary"><Store className="h-4 w-4" /> Find Store</Link>
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-4 text-center">
                   <Stat label="Orders" value={orders.length} />
