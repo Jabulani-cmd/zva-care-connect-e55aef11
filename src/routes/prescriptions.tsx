@@ -64,8 +64,8 @@ function UploadWizard({ onSubmit }: { onSubmit: ReturnType<typeof useAuth.getSta
   const canNext2 = (forSelf || patient.trim().length > 0) && scriptDate.length > 0;
   const canSubmit = confirm;
 
-  const goNext = () => setStep((s) => Math.min(5, (s + 1) as 1 | 2 | 3 | 4 | 5));
-  const goBack = () => setStep((s) => Math.max(1, (s - 1) as 1 | 2 | 3 | 4 | 5));
+  const goNext = () => setStep((s) => (s < 5 ? ((s + 1) as 1 | 2 | 3 | 4 | 5) : s));
+  const goBack = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3 | 4 | 5) : s));
 
   const submit = () => {
     const id = onSubmit({
