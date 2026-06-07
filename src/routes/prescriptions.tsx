@@ -24,7 +24,7 @@ function PrescriptionsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
-      <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-dark p-6 text-primary-foreground shadow-lg">
+      <div className="rounded-md bg-primary p-6 text-primary-foreground shadow-sm">
         <div className="text-xs font-bold uppercase tracking-wider opacity-90">Pharmacy services</div>
         <h1 className="mt-1 text-2xl font-extrabold md:text-3xl">My Prescriptions</h1>
         <p className="mt-1 text-sm opacity-95 md:max-w-xl">Upload your script and a Plus2 pharmacist will review it within 30 minutes. Approved scripts are dispensed and delivered to your door.</p>
