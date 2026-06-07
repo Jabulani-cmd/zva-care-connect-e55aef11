@@ -51,7 +51,7 @@ const DEMO_ORDERS: Order[] = [
     total: 489.97,
     status: "Delivered",
     items: [
-      { name: "Panado 500mg 24s", qty: 2, price: 39.99, emoji: "💊" },
+      { name: "Panado 500mg 24s", qty: 2, price: 39.99 },
       { name: "Centrum Multivitamin 30s", qty: 1, price: 209.99, emoji: "🌿" },
       { name: "Nivea Body Lotion 400ml", qty: 1, price: 99.99, emoji: "🧴" },
     ],
@@ -69,7 +69,7 @@ const DEMO_ORDERS: Order[] = [
     total: 234.5,
     status: "Out for delivery",
     items: [
-      { name: "Allergex 30s", qty: 1, price: 64.99, emoji: "💊" },
+      { name: "Allergex 30s", qty: 1, price: 64.99 },
       { name: "Vicks VapoRub 50g", qty: 1, price: 79.99, emoji: "🧴" },
     ],
     address: "42 Long Street, Gardens, Cape Town 8001",

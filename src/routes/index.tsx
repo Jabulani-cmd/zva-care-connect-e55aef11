@@ -57,7 +57,7 @@ function Home() {
                 className="group relative flex min-w-[180px] aspect-[5/3] overflow-hidden rounded-lg border border-[#E5E7EB] md:min-w-0"
               >
                 <img src={c.image} alt={c.name} className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-black/55" />
                 <div className="relative z-10 mt-auto flex w-full items-center gap-2 p-4 text-white">
                   <Icon className="h-4 w-4" />
                   <span className="text-sm font-semibold">{c.name}</span>

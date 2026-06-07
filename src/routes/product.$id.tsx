@@ -94,7 +94,7 @@ function ProductPage() {
             </button>
           </div>
           <div className="mt-3 flex gap-3">
-            <button onClick={() => { toggleWishlist(product.id); toast.success(wished ? "Removed" : "❤️ Wishlisted"); }} className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-3 text-sm font-bold hover:bg-muted">
+            <button onClick={() => { toggleWishlist(product.id); toast.success(wished ? "Removed from wishlist" : "Added to wishlist"); }} className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-3 text-sm font-bold hover:bg-muted">
               <Heart className={`h-4 w-4 ${wished ? "fill-accent text-accent" : ""}`} /> Wishlist
             </button>
             <button className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-3 text-sm font-bold hover:bg-muted">

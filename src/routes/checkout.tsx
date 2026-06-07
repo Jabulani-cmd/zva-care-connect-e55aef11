@@ -32,7 +32,7 @@ function Checkout() {
 
   const next = () => setStep((s) => Math.min(s + 1, 3));
   const back = () => setStep((s) => Math.max(s - 1, 0));
-  const place = () => { clearCart(); setStep(3); toast.success("🎉 Order placed!"); };
+  const place = () => { clearCart(); setStep(3); toast.success("Order placed"); };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
