@@ -5,6 +5,8 @@ import { useShop, formatUSD, formatZIG } from "@/store/shop";
 import { getProduct } from "@/data/products";
 import { Check, CreditCard, Truck, MapPin, Sparkles, Smartphone, Building2, Banknote, Eye, EyeOff } from "lucide-react";
 import { PaymentSimulator, detectBrand, formatCardNumber, formatExpiry } from "@/components/checkout/PaymentSimulator";
+import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
+import { buildReceipt, type Receipt } from "@/lib/receipts";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Plus2 Pharmacy" }] }),
@@ -29,6 +31,7 @@ function Checkout() {
   const [cvvVisible, setCvvVisible] = useState(false);
   const [simOpen, setSimOpen] = useState(false);
   const [authRef, setAuthRef] = useState<string | null>(null);
+  const [receipt, setReceipt] = useState<Receipt | null>(null);
 
   if (items.length === 0 && step < 3) {
     return <div className="p-12 text-center"><p className="text-muted-foreground">Your cart is empty.</p><Link to="/" className="mt-4 inline-block rounded-md bg-primary px-6 py-3 font-bold text-primary-foreground">Shop now</Link></div>;
@@ -36,12 +39,38 @@ function Checkout() {
 
   const next = () => setStep((s) => Math.min(s + 1, 3));
   const back = () => setStep((s) => Math.max(s - 1, 0));
+
+  const makeReceipt = (auth: string | null) => {
+    const deliveryLabel = ({ standard: "Standard Delivery", express: "Same-day Express", national: "Nationwide Courier", collect: "Click & Collect" } as Record<string, string>)[delivery_.method] ?? "Standard";
+    const addr = delivery_.method === "collect"
+      ? "Pick up: Avondale Branch, Harare"
+      : `${delivery_.firstName} ${delivery_.lastName}, ${delivery_.street}, ${delivery_.suburb}, ${delivery_.city}, Zimbabwe`;
+    return buildReceipt({
+      orderNumber,
+      authRef: auth ?? undefined,
+      items: items.map((i) => ({ name: i.product.name, sku: i.product.id.toUpperCase(), qty: i.qty, unitPrice: i.product.price, lineTotal: +(i.product.price * i.qty).toFixed(2) })),
+      customer: {
+        name: `${delivery_.firstName || "Demo"} ${delivery_.lastName || "Customer"}`.trim(),
+        email: delivery_.email || "customer@plus2pharmacy.co.zw",
+        phone: delivery_.phone || "+263 78 200 0100",
+        address: addr,
+      },
+      paymentMethod: labelFor(payment.method),
+      cardLast4: payment.method === "card" ? cardDigits.slice(-4) : undefined,
+      cardType: payment.method === "card" ? (brand === "visa" ? "Visa" : brand === "mastercard" ? "Mastercard" : "Card") : undefined,
+      deliveryMethod: deliveryLabel,
+      deliveryFee: delivery,
+    });
+  };
+
   const place = () => {
     if (payment.method === "card") {
       setSimOpen(true);
       return;
     }
+    const r = makeReceipt(null);
     clearCart();
+    setReceipt(r);
     setStep(3);
     toast.success("Order placed");
   };
