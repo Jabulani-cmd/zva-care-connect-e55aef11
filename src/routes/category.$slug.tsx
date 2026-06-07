@@ -14,7 +14,7 @@ export const Route = createFileRoute("/category/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `${(CATEGORIES.find((c) => c.slug === params.slug)?.name) ?? "Shop"} — Plus2 Pharmacy` },
-      { name: "description", content: "Browse quality products from South Africa's trusted pharmacy." },
+      { name: "description", content: "Browse quality products from Zimbabwe's trusted pharmacy." },
     ],
   }),
   component: CategoryPage,
