@@ -1,0 +1,37 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Home, LayoutGrid, ShoppingCart, User } from "lucide-react";
+import { useShop } from "@/store/shop";
+
+export function MobileBottomNav() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const count = useShop((s) => s.cart.reduce((a, c) => a + c.qty, 0));
+  const items = [
+    { to: "/", label: "Home", icon: Home, match: pathname === "/" },
+    { to: "/category/$slug", label: "Shop", icon: LayoutGrid, params: { slug: "all" }, match: pathname.startsWith("/category") },
+    { to: "/cart", label: "Cart", icon: ShoppingCart, match: pathname === "/cart", badge: count },
+    { to: "/account", label: "Account", icon: User, match: pathname === "/account" },
+  ] as const;
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur md:hidden">
+      <div className="flex">
+        {items.map((it) => {
+          const Icon = it.icon;
+          return (
+            <Link
+              key={it.label}
+              to={it.to}
+              params={"params" in it ? it.params : undefined}
+              className={`relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium ${it.match ? "text-primary" : "text-muted-foreground"}`}
+            >
+              <Icon className="h-5 w-5" />
+              {it.label}
+              {"badge" in it && it.badge ? (
+                <span className="absolute right-1/4 top-1 rounded-full bg-accent px-1.5 text-[9px] font-bold text-accent-foreground">{it.badge}</span>
+              ) : null}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

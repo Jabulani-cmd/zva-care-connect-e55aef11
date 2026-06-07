@@ -1,146 +1,131 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "framer-motion";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronLeft, Minus, Plus, Camera, Image as ImageIcon, AlertTriangle, Upload } from "lucide-react";
-import { getProduct, PRODUCTS, useStore } from "@/lib/store";
-import { StockBadge } from "@/components/stock-badge";
-import { ProductCard } from "@/components/product-card";
 import { toast } from "sonner";
+import { getProduct, PRODUCTS } from "@/data/products";
+import { ProductImage } from "@/components/product/ProductImage";
+import { ProductCard } from "@/components/product/ProductCard";
+import { RatingStars } from "@/components/product/RatingStars";
+import { useShop, formatZAR } from "@/store/shop";
+import { Heart, Minus, Plus, ShoppingCart, ChevronRight, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/product/$id")({
+  loader: ({ params }) => {
+    const p = getProduct(params.id);
+    if (!p) throw notFound();
+    return p;
+  },
+  head: ({ loaderData }) => ({
+    meta: loaderData ? [
+      { title: `${loaderData.name} — Plus2 Pharmacy` },
+      { name: "description", content: loaderData.shortDesc },
+    ] : [],
+  }),
+  notFoundComponent: () => <div className="p-12 text-center">Product not found</div>,
   component: ProductPage,
 });
 
-type UploadStage = "idle" | "picking" | "preview" | "uploading" | "done";
-
 function ProductPage() {
-  const { id } = Route.useParams();
-  const p = getProduct(id);
-  const add = useStore((s) => s.add);
-  const nav = useNavigate();
+  const product = Route.useLoaderData();
   const [qty, setQty] = useState(1);
-  const [stage, setStage] = useState<UploadStage>("idle");
-  const [progress, setProgress] = useState(0);
-  const [rxOk, setRxOk] = useState(false);
-
-  if (!p) return <div className="p-10 text-center">Product not found. <Link to="/" className="underline">Back home</Link></div>;
-
-  const related = PRODUCTS.filter((x) => x.id !== p.id).slice(0, 4);
-  const requiresRx = p.stock === "rx";
-
-  function startUpload() {
-    setStage("preview");
-    setTimeout(() => {
-      setStage("uploading");
-      setProgress(0);
-      const iv = setInterval(() => {
-        setProgress((v) => {
-          if (v >= 100) { clearInterval(iv); setStage("done"); setRxOk(true); return 100; }
-          return v + 8;
-        });
-      }, 120);
-    }, 700);
-  }
+  const [tab, setTab] = useState<"desc" | "ingredients" | "use" | "reviews">("desc");
+  const addToCart = useShop((s) => s.addToCart);
+  const toggleWishlist = useShop((s) => s.toggleWishlist);
+  const wished = useShop((s) => s.wishlist.includes(product.id));
+  const related = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 md:py-8">
-      <button onClick={() => nav({ to: "/" })} className="flex items-center gap-1 text-sm font-semibold text-[#1B3A6B] mb-4"><ChevronLeft className="h-4 w-4" /> Back</button>
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <nav className="mb-4 flex items-center gap-1 text-xs text-muted-foreground">
+        <Link to="/" className="hover:text-primary">Home</Link>
+        <ChevronRight className="h-3 w-3" />
+        <Link to="/category/$slug" params={{ slug: product.category }} className="capitalize hover:text-primary">{product.category}</Link>
+        <ChevronRight className="h-3 w-3" />
+        <span className="line-clamp-1 text-foreground">{product.name}</span>
+      </nav>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-          className="aspect-square rounded-3xl flex items-center justify-center text-[160px] shadow-sm" style={{ background: p.color }}>
-          {p.emoji}
-        </motion.div>
-
-        <div className="space-y-4">
-          <div className="flex items-center gap-2"><StockBadge stock={p.stock} count={p.stockCount} /><span className="text-xs text-muted-foreground">{p.category}</span></div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-black text-[#1B3A6B] leading-tight">{p.name}</h1>
-            {p.brand && <div className="text-sm text-muted-foreground mt-1">by {p.brand}</div>}
-          </div>
-          <div className="text-3xl font-black text-[#1B3A6B]">${p.price.toFixed(2)}</div>
-          <p className="text-sm text-foreground/80 leading-relaxed">{p.description}</p>
-
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            {p.dosage && <div className="bg-white rounded-xl p-3 border border-border"><div className="font-bold text-[#1B3A6B] mb-0.5">Dosage</div><div className="text-muted-foreground">{p.dosage}</div></div>}
-            {p.manufacturer && <div className="bg-white rounded-xl p-3 border border-border"><div className="font-bold text-[#1B3A6B] mb-0.5">Manufacturer</div><div className="text-muted-foreground">{p.manufacturer}</div></div>}
-            {p.expiry && <div className="bg-white rounded-xl p-3 border border-border"><div className="font-bold text-[#1B3A6B] mb-0.5">Expiry</div><div className="text-muted-foreground">{p.expiry}</div></div>}
-          </div>
-
-          {requiresRx && (
-            <div className="rounded-2xl bg-[#E8EFFC] border border-[#1E5BC6]/30 p-4">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl">📋</div>
-                <div className="flex-1">
-                  <div className="font-bold text-[#1B3A6B] text-sm">Prescription Required</div>
-                  <p className="text-xs text-foreground/70 mt-1">This item requires a valid prescription. Upload yours below for pharmacist review.</p>
-                  {stage === "idle" && (
-                    <button onClick={() => setStage("picking")} className="mt-3 inline-flex items-center gap-2 bg-[#1E5BC6] text-white rounded-lg px-4 py-2 text-xs font-bold">
-                      <Upload className="h-3.5 w-3.5" /> Upload Prescription
-                    </button>
-                  )}
-                  <AnimatePresence>
-                    {stage === "picking" && (
-                      <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-3 flex gap-2">
-                        <button onClick={startUpload} className="flex-1 bg-white border-2 border-[#1E5BC6] text-[#1E5BC6] rounded-lg py-2 text-xs font-bold flex items-center justify-center gap-1.5"><Camera className="h-4 w-4" /> Camera</button>
-                        <button onClick={startUpload} className="flex-1 bg-white border-2 border-[#1E5BC6] text-[#1E5BC6] rounded-lg py-2 text-xs font-bold flex items-center justify-center gap-1.5"><ImageIcon className="h-4 w-4" /> Gallery</button>
-                      </motion.div>
-                    )}
-                    {stage === "preview" && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 bg-white rounded-lg p-3 flex items-center gap-3">
-                        <div className="h-14 w-14 rounded bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-2xl">📄</div>
-                        <div className="text-xs"><div className="font-bold">prescription.jpg</div><div className="text-muted-foreground">Preparing…</div></div>
-                      </motion.div>
-                    )}
-                    {stage === "uploading" && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 bg-white rounded-lg p-3">
-                        <div className="text-xs font-semibold mb-2">Uploading… {progress}%</div>
-                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-[#1E5BC6] transition-all" style={{ width: `${progress}%` }} /></div>
-                      </motion.div>
-                    )}
-                    {stage === "done" && (
-                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mt-3 bg-[#E5F4EC] border border-[#1A7A4A]/30 rounded-lg p-3 text-xs text-[#0F5C36] font-semibold">
-                        ✅ Prescription received. A pharmacist will review within 15 minutes.
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div>
+          <ProductImage product={product} className="aspect-square w-full rounded-2xl" />
+          <div className="mt-3 grid grid-cols-4 gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="aspect-square cursor-pointer overflow-hidden rounded-lg border-2 border-border opacity-70 transition hover:border-primary hover:opacity-100" style={{ background: product.bg }}>
+                <div className="flex h-full items-center justify-center text-2xl">{product.emoji}</div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+        </div>
 
-          {requiresRx && (
-            <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 flex gap-2 text-xs text-amber-900">
-              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>⚠️ Please inform your pharmacist of all medications you are currently taking, including OTC and herbal supplements.</span>
-            </div>
-          )}
+        <div>
+          <div className="text-xs font-bold uppercase tracking-wider text-primary">{product.brand}</div>
+          <h1 className="mt-1 text-2xl font-extrabold md:text-3xl">{product.name}</h1>
+          <div className="mt-2 flex items-center gap-3">
+            <RatingStars rating={product.rating} reviews={product.reviewCount} size="md" />
+            <span className="text-xs text-muted-foreground">SKU: {product.id.toUpperCase()}-001</span>
+          </div>
 
-          <div className="flex items-center gap-3 pt-2">
-            <div className="flex items-center bg-white border border-border rounded-full">
-              <button onClick={() => setQty(Math.max(1, qty - 1))} className="h-11 w-11 flex items-center justify-center text-[#1B3A6B]"><Minus className="h-4 w-4" /></button>
-              <span className="w-8 text-center font-bold">{qty}</span>
-              <button onClick={() => setQty(qty + 1)} className="h-11 w-11 flex items-center justify-center text-[#1B3A6B]"><Plus className="h-4 w-4" /></button>
+          <div className="mt-5 flex items-baseline gap-3">
+            <span className="text-4xl font-extrabold text-foreground">{formatZAR(product.price)}</span>
+            {product.originalPrice && (
+              <>
+                <span className="text-lg text-muted-foreground line-through">{formatZAR(product.originalPrice)}</span>
+                <span className="rounded-md bg-accent px-2 py-1 text-xs font-bold text-accent-foreground">SAVE {product.savePct}%</span>
+              </>
+            )}
+          </div>
+
+          <div className="mt-4">
+            {product.stock === "in" && <span className="inline-flex items-center gap-1 text-sm font-semibold text-success"><CheckCircle2 className="h-4 w-4" /> In Stock</span>}
+            {product.stock === "low" && <span className="inline-flex items-center gap-1 text-sm font-semibold text-warning"><AlertTriangle className="h-4 w-4" /> Low Stock — order soon</span>}
+          </div>
+
+          <p className="mt-4 text-sm text-muted-foreground">{product.shortDesc}</p>
+
+          <div className="mt-6 flex items-center gap-3">
+            <div className="flex items-center rounded-md border border-border">
+              <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-3 hover:bg-muted"><Minus className="h-4 w-4" /></button>
+              <span className="w-10 text-center font-bold">{qty}</span>
+              <button onClick={() => setQty(qty + 1)} className="p-3 hover:bg-muted"><Plus className="h-4 w-4" /></button>
             </div>
             <button
-              disabled={p.stock === "out" || (requiresRx && !rxOk)}
-              onClick={() => { add(p.id, qty); toast.success(`Added ${qty} × ${p.name}`); }}
-              className="flex-1 h-12 rounded-full bg-[#1B3A6B] text-white font-bold hover:bg-[#1E5BC6] transition disabled:opacity-50"
+              onClick={() => { addToCart(product.id, qty); toast.success(`✅ Added ${qty} × ${product.brand}`); }}
+              className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary py-3 font-bold text-primary-foreground transition hover:bg-primary-dark"
             >
-              {p.stock === "out" ? "Out of Stock" : requiresRx && !rxOk ? "Upload Rx First" : "Add to Cart"}
+              <ShoppingCart className="h-4 w-4" /> Add to Cart
             </button>
+          </div>
+          <div className="mt-3 flex gap-3">
+            <button onClick={() => { toggleWishlist(product.id); toast.success(wished ? "Removed" : "❤️ Wishlisted"); }} className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-3 text-sm font-bold hover:bg-muted">
+              <Heart className={`h-4 w-4 ${wished ? "fill-accent text-accent" : ""}`} /> Wishlist
+            </button>
+            <button className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-3 text-sm font-bold hover:bg-muted">
+              <FileText className="h-4 w-4" /> Schedule Repeat
+            </button>
+          </div>
+
+          <div className="mt-8">
+            <div className="flex gap-1 border-b border-border">
+              {([["desc", "Description"], ["ingredients", "Ingredients"], ["use", "How to Use"], ["reviews", "Reviews"]] as const).map(([k, label]) => (
+                <button key={k} onClick={() => setTab(k)} className={`px-4 py-2 text-sm font-semibold transition ${tab === k ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground"}`}>{label}</button>
+              ))}
+            </div>
+            <div className="py-4 text-sm text-foreground/80">
+              {tab === "desc" && <p>{product.longDesc}</p>}
+              {tab === "ingredients" && <p>{product.ingredients}</p>}
+              {tab === "use" && <p>{product.howToUse}</p>}
+              {tab === "reviews" && <p>★ {product.rating.toFixed(1)} from {product.reviewCount} verified customers. "Excellent product, fast delivery, will buy again!" — Verified buyer</p>}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-10">
-        <h2 className="text-lg font-black text-[#1B3A6B] mb-3">You may also like</h2>
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-          {related.map((r) => (
-            <div key={r.id} className="shrink-0 w-44"><ProductCard p={r} /></div>
-          ))}
-        </div>
-      </div>
+      {related.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-4 text-xl font-extrabold">Customers Also Viewed</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {related.map((p) => <ProductCard key={p.id} product={p} />)}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

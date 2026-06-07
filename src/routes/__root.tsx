@@ -8,11 +8,14 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { Toaster } from "@/components/ui/sonner";
-import { TopNav, MobileHeader, BottomTabs, DemoBadge } from "@/components/nav";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { DemoBadge } from "@/components/layout/DemoBadge";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -93,6 +96,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -120,14 +129,16 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TopNav />
-      <MobileHeader />
-      <main className="min-h-screen pb-20 md:pb-8">
-        <Outlet />
-      </main>
-      <BottomTabs />
-      <DemoBadge />
-      <Toaster position="top-center" richColors />
+      <div className="flex min-h-screen flex-col bg-background font-sans antialiased" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <Navbar />
+        <main className="flex-1 pb-20 md:pb-0">
+          <Outlet />
+        </main>
+        <Footer />
+        <MobileBottomNav />
+        <DemoBadge />
+        <Toaster position="top-center" richColors />
+      </div>
     </QueryClientProvider>
   );
 }

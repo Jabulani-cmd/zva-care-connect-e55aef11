@@ -1,64 +1,90 @@
+# Plus2 Pharmacy — Demo App Plan
 
-# Kings Pharmacy — Interactive Demo App
+A production-feel, mobile-first pharmacy e-commerce demo inspired by Dis-Chem, built for a 30-min investor presentation. Fully client-side, no backend.
 
-A fully responsive, mobile-first pharmacy e-commerce demo with 5 screens and realistic interactive flows (payment OTP, prescription upload, live order tracking). All data mocked in client state — no backend.
+## Brand & Design System
+- Name: **Plus2 Pharmacy** — tagline "Your Health, Our Priority"
+- Colors via `src/styles.css` tokens (oklch):
+  - `--primary` Dis-Chem green `#00853F`
+  - `--accent` orange `#F26522` (sale badges, CTAs)
+  - Neutrals: white, light grey surface, deep grey text
+  - Success/warn/info tokens for stock states
+- Font: Inter (loaded via `<link>` in `__root.tsx`, registered in `@theme`)
+- Logo: SVG green cross/pill + "Plus2 Pharmacy" wordmark (inline component)
+- Tailwind v4 tokens, semantic classes only — no hardcoded hex in components
 
-## Scope
-
-- 5 routes: Home, Product Detail, Cart/Checkout, Order Tracking, Account
-- Bottom tab nav on mobile; top nav on desktop
-- Floating cart button + "Demo Mode" pill on all screens
-- Brand colors wired as semantic tokens in `src/styles.css` (oklch)
-- Inter font, uploaded logo used in header
-
-## Routes (TanStack file-based)
-
+## Routes (TanStack Start, file-based)
 ```
 src/routes/
-  __root.tsx           shell + nav + cart drawer + demo badge
-  index.tsx            home/storefront
-  product.$id.tsx      product detail
-  cart.tsx             multi-step checkout
-  track.tsx            live order tracking
-  account.tsx          profile + rewards + prescriptions
+  __root.tsx          shell, fonts, Navbar, Footer, CartDrawer, Toaster, DemoBadge
+  index.tsx           Home
+  category.$slug.tsx  Product listing (filters, sort)
+  product.$id.tsx     Product detail
+  cart.tsx            Cart
+  checkout.tsx        Multi-step checkout (state machine)
+  account.tsx         Account dashboard (tabbed)
+  services.tsx        Pharmacy services + store locator
 ```
+Each route gets unique `head()` metadata (title, description, og:*).
 
-## Screen 1 — Home
-Sticky header (logo, search, cart badge, avatar) · 3-slide hero carousel · scrollable category chips · 8 hardcoded products in a 2/4-col grid with stock-status badges and contextual CTAs (Add/Notify/Rx) · flash-sale promo banner.
+## Global State (Zustand)
+`src/store/shop.ts` — single store:
+- `products` (seeded ~20 SA products, see list below)
+- `cart: {id, qty}[]`, `wishlist: id[]`
+- `addToCart`, `removeFromCart`, `updateQty`, `toggleWishlist`, `clearCart`
+- `promoCode`, `appliedDiscount`
+- Persist to `localStorage`
 
-## Screen 2 — Product Detail
-Large emoji-on-color hero · description, dosage, manufacturer, expiry · qty stepper · Add to Cart · for Rx items: blue prescription banner + mock upload modal (camera/gallery → preview → progress bar → success) · drug-interaction warning · "You may also like" horizontal scroll.
+## Components (`src/components/`)
+- `layout/Navbar.tsx` — sticky, logo, search (live filter via URL search param), wishlist, cart-count badge with bump animation; category strip below
+- `layout/Footer.tsx` — links, payment icons (Visa/MC/PayFast/PayGate/Mobicred SVGs), app badges, socials
+- `layout/MobileBottomNav.tsx` — Home/Categories/Cart/Account (mobile only)
+- `layout/DemoBadge.tsx` — floating "Demo Mode" pill bottom-right
+- `home/HeroCarousel.tsx` — embla, 3 gradient slides, auto-advance 5s
+- `home/CategoryGrid.tsx` — 8 categories w/ emoji + colored bg, horizontal scroll on mobile
+- `home/FlashDeals.tsx` — countdown timer + horizontal product row
+- `home/BrandsStrip.tsx`, `home/BlogTeasers.tsx`, `home/TopSellers.tsx`
+- `product/ProductCard.tsx` — image, SAVE % badge, name, brand, rating, price (strike + discount), Add-to-Cart, wishlist heart
+- `product/ProductGallery.tsx` — main + thumbs, swipeable
+- `product/QuantityStepper.tsx`, `product/StockBadge.tsx`, `product/RatingStars.tsx`
+- `listing/FilterSidebar.tsx` — desktop sidebar / mobile Sheet: brand checkboxes, price slider, rating, in-stock, on-promo
+- `listing/SortDropdown.tsx`
+- `cart/CartDrawer.tsx` — slide-out Sheet from navbar cart icon
+- `checkout/StepIndicator.tsx`, `checkout/DeliveryForm.tsx`, `checkout/PaymentForm.tsx`, `checkout/ReviewStep.tsx`, `checkout/Confirmation.tsx`
+- `account/BenefitCard.tsx` — green gradient loyalty card, points + tier
 
-## Screen 3 — Cart & Checkout (4 animated steps)
-1. **Cart review** — items, subtotal, $2.50 delivery, total
-2. **Delivery details** — name/phone/address/city/notes, ASAP vs scheduled slot picker
-3. **Payment** — tappable method cards (EcoCash, OneMoney, InnBucks, Telecash, ZIPIT, Visa/MC, COD), each revealing its own form:
-   - Mobile money/InnBucks: phone + PIN → OTP 6-digit entry → Verify & Pay
-   - ZIPIT: bank dropdown + account → Confirm Transfer
-   - Card: formatted card number (4-digit groups), expiry, CVV, name, billing → Pay Securely 🔒
-   - COD: confirmation only
-   - ZiG equivalent shown under USD for mobile-money methods
-4. **Confirmation** — animated ✅, order ref `#KP-2026-00847`, summary, ETA, "Track My Order"
+## Data (`src/data/`)
+- `products.ts` — 20 hardcoded SA products with realistic fields: id, name, brand, category, price, originalPrice?, savePct?, rating, reviewCount, stock ("in"|"low"|"out"), image (Unsplash URL or colored-bg emoji fallback), shortDesc, longDesc, ingredients, howToUse, isPrescription
+- `categories.ts` — 8 categories with emoji + color
+- `brands.ts`, `blogPosts.ts` (3), `heroSlides.ts` (3)
 
-## Screen 4 — Live Order Tracking
-Status banner · 6-step progress stepper (vertical mobile / horizontal desktop) · stylized SVG map with animated 🚗 traveling dashed route to 📍 · driver card (Tinashe M., 5★) · ETA · "Simulate Delivery Progress" button advances stepper + car · "Contact Driver" mock chat popup.
+Products list matches the 20 in the brief (Panado, Allergex, Bioplus, Vitaforce, Dove, Neutrogena, Huggies, Lennon, USN, Himalaya, Johnson's, Natio, Rennies, Oral-B, Nurofen, Herbalife, Pampers, Bio-Oil, Caltrate, Dettol).
 
-## Screen 5 — Account
-Chipo Moyo avatar, member since 2024 · Kings Rewards loyalty card (1,240 pts, Gold) · sections: Orders (3 mock), Prescriptions (2 with status), Addresses, Payment Methods, Health Profile (Penicillin allergy, Metformin), Refill Reminders (toggles), Settings, Log Out.
+## Interactions
+- Add-to-Cart → sonner toast "✅ Added to cart" + animated badge bump
+- Wishlist toggle → toast + filled heart
+- Search in navbar → navigates to `/category/all?q=...`, live-filters
+- Filters/sort fully functional via URL search params + Zustand
+- Checkout: react-hook-form per step with basic Zod validation; "Place Order" clears cart, generates order #, navigates to Confirmation
+- Promo code: hardcoded `PLUS10` → 10% off
+- Free delivery auto-applies over R500
 
-## Cross-cutting
+## Responsive Strategy
+- Mobile-first; verified at 375px and 1280px+
+- Product grid: 2 / 3 / 4 cols
+- Filter sidebar → bottom Sheet on mobile
+- Cart: full page on mobile, drawer from navbar on desktop
+- Mobile bottom nav fixed; hidden md+
 
-- **State**: Zustand store for cart, prescription upload, tracking step
-- **Stock badges** with exact hex pills, Add-to-Cart disabled when out
-- **Animations**: framer-motion for page fade/slide-up, step transitions, success checkmark, car motion
-- **Logo**: uploaded webp registered via lovable-assets CDN pointer
-- **Responsive**: mobile 375–430 bottom tabs, tablet 768 2-col, desktop 1280 top nav + 4-col
+## Out of Scope
+No backend, no real payment, no auth, no real map (placeholder image with city dropdown), no Lovable Cloud.
 
-## Technical notes
+---
 
-- `src/styles.css` — add tokens: `--brand-navy`, `--brand-royal`, `--brand-success`, `--brand-amber`, `--brand-danger`, `--brand-rx`, plus map to `--color-*`
-- Inter via Google Fonts `@import` in styles.css
-- shadcn primitives used: button, input, dialog, drawer, tabs, badge, card, progress, switch, select, sheet
-- No backend, no Cloud — purely client-mocked
-
-Ready to build on approval.
+## Technical Notes
+- Stack: TanStack Start v1 + React 19 + Tailwind v4 + shadcn (existing) + Zustand + sonner + embla + react-hook-form + zod + lucide-react + framer-motion (for badge bump / hover scale)
+- Install: `bun add zustand framer-motion react-hook-form zod`
+- Images: Unsplash hotlinks per product; fallback to colored div + emoji if needed
+- All colors via CSS tokens in `src/styles.css` under `@theme inline`
+- Delete the blank-page placeholder in `src/routes/index.tsx`
+- Add `notFoundComponent` + `errorComponent` on root and data routes
