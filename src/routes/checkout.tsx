@@ -3,7 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useShop, formatUSD, formatZIG } from "@/store/shop";
 import { getProduct } from "@/data/products";
-import { Check, CreditCard, Truck, MapPin, Sparkles, Smartphone, Building2, Banknote } from "lucide-react";
+import { Check, CreditCard, Truck, MapPin, Sparkles, Smartphone, Building2, Banknote, Eye, EyeOff } from "lucide-react";
+import { PaymentSimulator, detectBrand, formatCardNumber, formatExpiry } from "@/components/checkout/PaymentSimulator";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Plus2 Pharmacy" }] }),
@@ -25,6 +26,9 @@ function Checkout() {
   const [delivery_, setDelivery] = useState({ firstName: "", lastName: "", phone: "", email: "", street: "", suburb: "", city: "Harare", province: "Harare", postal: "", method: "standard" });
   const [payment, setPayment] = useState({ method: "ecocash", number: "", expiry: "", cvv: "", name: "", mobile: "" });
   const orderNumber = "P2-" + Math.floor(100000 + Math.random() * 900000);
+  const [cvvVisible, setCvvVisible] = useState(false);
+  const [simOpen, setSimOpen] = useState(false);
+  const [authRef, setAuthRef] = useState<string | null>(null);
 
   if (items.length === 0 && step < 3) {
     return <div className="p-12 text-center"><p className="text-muted-foreground">Your cart is empty.</p><Link to="/" className="mt-4 inline-block rounded-md bg-primary px-6 py-3 font-bold text-primary-foreground">Shop now</Link></div>;
@@ -32,7 +36,19 @@ function Checkout() {
 
   const next = () => setStep((s) => Math.min(s + 1, 3));
   const back = () => setStep((s) => Math.max(s - 1, 0));
-  const place = () => { clearCart(); setStep(3); toast.success("Order placed"); };
+  const place = () => {
+    if (payment.method === "card") {
+      setSimOpen(true);
+      return;
+    }
+    clearCart();
+    setStep(3);
+    toast.success("Order placed");
+  };
+
+  const fillTestCard = (n: string) => setPayment({ ...payment, name: payment.name || "Demo Customer", number: formatCardNumber(n), expiry: "12/27", cvv: "123" });
+  const cardDigits = payment.number.replace(/\s/g, "");
+  const brand = detectBrand(cardDigits);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
@@ -127,11 +143,76 @@ function Checkout() {
                 </div>
               )}
               {payment.method === "card" && (
-                <div className="mt-5 grid grid-cols-2 gap-3">
-                  <Field label="Cardholder name" value={payment.name} onChange={(v) => setPayment({ ...payment, name: v })} className="col-span-2" />
-                  <Field label="Card number" value={payment.number} onChange={(v) => setPayment({ ...payment, number: v })} placeholder="4242 4242 4242 4242" className="col-span-2" />
-                  <Field label="Expiry" value={payment.expiry} onChange={(v) => setPayment({ ...payment, expiry: v })} placeholder="MM/YY" />
-                  <Field label="CVV" value={payment.cvv} onChange={(v) => setPayment({ ...payment, cvv: v })} placeholder="123" />
+                <div className="mt-5 space-y-4">
+                  <div className="flex flex-wrap gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-3 text-xs">
+                    <span className="font-bold uppercase tracking-wider text-primary">Demo test cards</span>
+                    <button type="button" onClick={() => fillTestCard("4242424242424242")} className="rounded-md border border-border bg-card px-2 py-1 font-mono font-bold hover:border-primary">
+                      4242 · success
+                    </button>
+                    <button type="button" onClick={() => fillTestCard("4000000000000002")} className="rounded-md border border-border bg-card px-2 py-1 font-mono font-bold hover:border-destructive hover:text-destructive">
+                      4000 · decline
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Cardholder name" value={payment.name} onChange={(v) => setPayment({ ...payment, name: v })} className="col-span-2" />
+                    <label className="col-span-2 block">
+                      <span className="mb-1 block text-xs font-bold text-foreground">Card number</span>
+                      <div className="relative">
+                        <input
+                          value={payment.number}
+                          onChange={(e) => setPayment({ ...payment, number: formatCardNumber(e.target.value) })}
+                          placeholder="4242 4242 4242 4242"
+                          inputMode="numeric"
+                          className="w-full rounded-md border border-border bg-background px-3 py-2 pr-16 font-mono text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2">
+                          {brand === "visa" && <span className="rounded bg-[#1A1F71] px-1.5 py-0.5 text-[10px] font-extrabold italic text-white">VISA</span>}
+                          {brand === "mastercard" && (
+                            <span className="flex items-center">
+                              <span className="h-4 w-4 rounded-full bg-[#EB001B]" />
+                              <span className="-ml-2 h-4 w-4 rounded-full bg-[#F79E1B] opacity-90" />
+                            </span>
+                          )}
+                          {brand === "card" && <CreditCard className="h-4 w-4 text-muted-foreground" />}
+                        </span>
+                      </div>
+                    </label>
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-bold text-foreground">Expiry (MM/YY)</span>
+                      <input
+                        value={payment.expiry}
+                        onChange={(e) => setPayment({ ...payment, expiry: formatExpiry(e.target.value) })}
+                        placeholder="MM/YY"
+                        inputMode="numeric"
+                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-bold text-foreground" title="3 digits on back of card">CVV</span>
+                      <div className="relative">
+                        <input
+                          type={cvvVisible ? "text" : "password"}
+                          value={payment.cvv}
+                          onChange={(e) => setPayment({ ...payment, cvv: e.target.value.replace(/\D/g, "").slice(0, 3) })}
+                          placeholder="123"
+                          inputMode="numeric"
+                          className="w-full rounded-md border border-border bg-background px-3 py-2 pr-9 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setCvvVisible((v) => !v)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          aria-label="Toggle CVV visibility"
+                        >
+                          {cvvVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </label>
+                    <label className="col-span-2 mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                      <input type="checkbox" className="accent-[var(--color-primary)]" /> Save this card for future use
+                    </label>
+                  </div>
                 </div>
               )}
               {payment.method === "bank" && (
@@ -179,6 +260,7 @@ function Checkout() {
               <p className="mt-1 text-muted-foreground">A confirmation email is on its way.</p>
               <div className="mx-auto mt-6 max-w-sm rounded-xl bg-surface p-5 text-left text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Order number</span><span className="font-extrabold">{orderNumber}</span></div>
+                {authRef && <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Payment ref</span><span className="font-mono font-extrabold">{authRef}</span></div>}
                 <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Estimated delivery</span><span className="font-bold">1–2 working days</span></div>
                 <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Total paid</span><span className="font-extrabold">{formatUSD(total)}</span></div>
                 <div className="mt-1 flex justify-between text-xs"><span className="text-muted-foreground">ZIG equivalent</span><span className="font-bold">{formatZIG(total)}</span></div>
@@ -217,6 +299,22 @@ function Checkout() {
           </aside>
         )}
       </div>
+
+      <PaymentSimulator
+        open={simOpen}
+        amount={total}
+        cardNumber={payment.number}
+        cardholder={payment.name}
+        brand={brand}
+        onClose={() => setSimOpen(false)}
+        onSuccess={(ref) => {
+          setAuthRef(ref);
+          setSimOpen(false);
+          clearCart();
+          setStep(3);
+          toast.success("Payment authorised — order placed");
+        }}
+      />
     </div>
   );
 }
