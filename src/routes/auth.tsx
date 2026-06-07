@@ -61,6 +61,9 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in or Register — Plus2 Pharmacy" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   component: AuthPage,
 });
 
@@ -69,9 +72,16 @@ function AuthPage() {
   const user = useAuth((s) => s.user);
   const navigate = useNavigate();
   const router = useRouter();
+  const { redirect } = Route.useSearch();
   useEffect(() => {
-    if (user) navigate({ to: "/account" });
-  }, [user, navigate]);
+    if (user) {
+      if (redirect) {
+        window.location.href = redirect;
+      } else {
+        navigate({ to: "/account" });
+      }
+    }
+  }, [user, navigate, redirect]);
 
   return (
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-2 lg:py-14">
