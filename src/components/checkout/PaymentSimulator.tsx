@@ -185,6 +185,19 @@ export function PaymentSimulator({ open, amount, cardNumber, cardholder, brand, 
 }
 
 function BrandPill({ brand }: { brand: "visa" | "mastercard" | "card" }) {
+  return _BrandPillImpl(brand);
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd>{value}</dd>
+    </div>
+  );
+}
+
+function _BrandPillImpl(brand: "visa" | "mastercard" | "card") {
   if (brand === "visa") return <span className="rounded bg-[#1A1F71] px-2 py-1 text-[10px] font-extrabold italic text-white">VISA</span>;
   if (brand === "mastercard")
     return (
