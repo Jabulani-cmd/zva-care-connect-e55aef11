@@ -16,15 +16,17 @@ export function FlashDeals() {
   const time = useCountdown(8073);
   const deals = PRODUCTS.filter((p) => p.flashDeal);
   return (
-    <section className="mt-10">
-      <div className="mb-4 flex items-end justify-between">
+    <section className="mt-12">
+      <div className="mb-6 flex items-end justify-between gap-4">
         <div>
-          <h2 className="flex items-center gap-2 text-xl font-extrabold md:text-2xl"><Flame className="h-6 w-6 text-accent" /> Today's Flash Deals</h2>
-          <p className="text-sm text-muted-foreground">Limited time — don't miss out</p>
+          <p className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#EA580C]"><Flame className="h-3.5 w-3.5" /> Limited Time</p>
+          <h2 className="mt-1 text-xl font-bold tracking-tight text-[#111827] md:text-2xl">Today's Flash Deals</h2>
         </div>
-        <div className="rounded-lg bg-foreground px-3 py-2 text-sm font-bold text-background">⏱ Ends in {time}</div>
+        <div className="rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-semibold text-[#111827]">
+          <span className="text-[#6B7280]">Ends in</span> <span className="ml-1 font-mono tabular-nums text-[#EA580C]">{time}</span>
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {deals.map((p) => <ProductCard key={p.id} product={p} />)}
       </div>
     </section>
