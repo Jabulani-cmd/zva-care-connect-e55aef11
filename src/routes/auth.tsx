@@ -76,7 +76,7 @@ function AuthPage() {
   useEffect(() => {
     if (user) {
       if (redirect) {
-        window.location.href = redirect;
+        router.history.push(redirect);
       } else {
         navigate({ to: "/account" });
       }
