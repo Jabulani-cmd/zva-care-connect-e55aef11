@@ -5,6 +5,7 @@ import {
   createRootRouteWithContext,
   useRouter,
   useNavigate,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -134,17 +135,19 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isStaff = pathname.startsWith("/staff");
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen flex-col bg-background font-sans antialiased" style={{ fontFamily: "'Open Sans', 'Inter', system-ui, sans-serif" }}>
-        <Navbar />
-        <main className="flex-1 pb-20 md:pb-0">
+        {!isStaff && <Navbar />}
+        <main className={isStaff ? "flex-1" : "flex-1 pb-20 md:pb-0"}>
           <Outlet />
         </main>
-        <Footer />
-        <MobileBottomNav />
-        <DemoBadge />
+        {!isStaff && <Footer />}
+        {!isStaff && <MobileBottomNav />}
+        {!isStaff && <DemoBadge />}
         <Toaster position="top-center" richColors />
       </div>
     </QueryClientProvider>
