@@ -1,62 +1,101 @@
-import { Logo } from "./Logo";
-import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import { useState } from "react";
+import { Facebook, Instagram, Twitter, Youtube, Linkedin, Lock, ChevronDown } from "lucide-react";
+
+const COLS = [
+  {
+    title: "Shop",
+    links: ["Pharmacy & Medicines", "Beauty & Skincare", "Baby & Maternity", "Vitamins & Supplements", "Sports Nutrition", "Personal Care", "Household"],
+  },
+  {
+    title: "Patient Services",
+    links: ["Upload a Prescription", "Track My Order", "Find a Pharmacy", "Chronic Medication", "Pharmacy Services", "Health Screenings", "Book a Consultation"],
+  },
+  {
+    title: "Help & Info",
+    links: ["Contact Us", "FAQs", "Delivery Information", "Returns Policy", "Privacy Policy", "Terms & Conditions", "Careers at Plus2"],
+  },
+];
 
 export function Footer() {
   return (
-    <footer className="mt-16 bg-[oklch(0.22_0.03_260)] text-white">
-      {/* Trust strip */}
-      <div className="border-b border-white/10 bg-[oklch(0.18_0.03_260)]">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-5 text-xs md:grid-cols-4 md:text-sm">
-          {[
-            { t: "Free Delivery", s: "On orders over R500" },
-            { t: "Click & Collect", s: "Ready in 2–4 hours" },
-            { t: "Secure Payment", s: "Visa, MasterCard, PayFast" },
-            { t: "Registered Pharmacists", s: "Trusted health advice" },
-          ].map((b) => (
-            <div key={b.t} className="flex flex-col">
-              <span className="font-bold text-white">{b.t}</span>
-              <span className="text-white/70">{b.s}</span>
+    <footer className="mt-16">
+      <div className="bg-primary text-white">
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-4">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-white/15">
+                <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="currentColor" aria-hidden>
+                  <path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z" />
+                </svg>
+              </div>
+              <div className="text-[17px] font-bold tracking-tight">Plus2 Pharmacy</div>
             </div>
+            <p className="mt-3 text-sm text-white/85">Your Health, Our Priority</p>
+            <p className="mt-3 text-[13px] leading-6 text-white/75">
+              Zimbabwe's trusted online pharmacy. Delivering quality healthcare products and prescription medication to your door.
+            </p>
+            <div className="mt-5 flex gap-3">
+              {[Facebook, Instagram, Twitter, Youtube, Linkedin].map((I, i) => (
+                <a
+                  key={i}
+                  href="#"
+                  className="text-white/85 transition hover:scale-110 hover:text-white"
+                  aria-label="Social link"
+                >
+                  <I className="h-5 w-5" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {COLS.map((col) => (
+            <FooterColumn key={col.title} title={col.title} links={col.links} />
           ))}
         </div>
       </div>
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-4">
-        <div>
-          <div className="rounded-sm bg-white p-3 inline-block"><Logo /></div>
-          <p className="mt-4 text-sm text-white/75">South Africa's trusted pharmacy retailer. Quality healthcare, beauty and wellness for every family.</p>
-          <div className="mt-4 flex gap-3">
-            {[Facebook, Instagram, Twitter, Youtube].map((I, i) => (
-              <a key={i} href="#" className="rounded-full bg-white/10 p-2 text-white transition hover:bg-accent hover:text-accent-foreground"><I className="h-4 w-4" /></a>
-            ))}
+
+      <div className="bg-primary-dark text-white">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 text-[12px] md:flex-row">
+          <div className="text-center text-white/70 md:text-left">
+            <p>© 2025 Plus2 Pharmacy (Pty) Ltd. All Rights Reserved.</p>
+            <p>Registered Pharmacy · MCAZ Accredited · VAT Reg: 4560281733</p>
           </div>
-        </div>
-        {[
-          { title: "Shop", links: ["Pharmacy", "Beauty", "Baby", "Vitamins", "Deals"] },
-          { title: "Customer", links: ["About Us", "Contact", "FAQs", "Store Locator", "Careers"] },
-          { title: "Services", links: ["Prescription Repeat", "Vaccinations", "Health Screening", "Medical Aid", "Benefit Card"] },
-        ].map((col) => (
-          <div key={col.title}>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white">{col.title}</h4>
-            <ul className="mt-3 space-y-2 text-sm text-white/75">
-              {col.links.map((l) => <li key={l}><a href="#" className="hover:text-accent">{l}</a></li>)}
-            </ul>
-          </div>
-        ))}
-      </div>
-      <div className="border-t border-white/10 bg-[oklch(0.15_0.025_260)]">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-5 text-xs text-white/70 md:flex-row">
-          <p>© 2025 Plus2 Pharmacy. All Rights Reserved.</p>
-          <div className="flex flex-wrap items-center gap-2">
-            {["VISA", "MC", "PayFast", "PayGate", "Mobicred"].map((p) => (
-              <span key={p} className="rounded border border-white/20 bg-white px-2 py-1 text-[10px] font-bold tracking-wider text-foreground">{p}</span>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <span className="rounded-md bg-white px-3 py-1.5 text-[10px] font-bold text-foreground">📱 App Store</span>
-            <span className="rounded-md bg-white px-3 py-1.5 text-[10px] font-bold text-foreground">▶ Google Play</span>
+          <div className="flex flex-wrap items-center gap-3 text-white/85">
+            <span className="rounded bg-white px-2 py-1 text-[10px] font-bold text-[#1A1F71]">VISA</span>
+            <span className="rounded bg-white px-2 py-1 text-[10px] font-bold text-[#EB001B]">MC</span>
+            <span className="rounded bg-white px-2 py-1 text-[10px] font-bold text-[#00853F]">EcoCash</span>
+            <span className="rounded bg-white px-2 py-1 text-[10px] font-bold text-[#374151]">ZIG</span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] text-white/85">
+              <Lock className="h-3 w-3" /> SSL Secured
+            </span>
           </div>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterColumn({ title, links }: { title: string; links: string[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-white/15 md:border-0">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between py-3 md:cursor-default md:py-0"
+      >
+        <h4 className="text-[12px] font-semibold uppercase tracking-[0.1em] text-white">{title}</h4>
+        <ChevronDown className={`h-4 w-4 text-white transition md:hidden ${open ? "rotate-180" : ""}`} />
+      </button>
+      <ul className={`space-y-2.5 pb-4 md:mt-4 md:block md:pb-0 ${open ? "block" : "hidden"}`}>
+        {links.map((l) => (
+          <li key={l}>
+            <a href="#" className="text-[14px] text-white/80 transition hover:text-white hover:underline">
+              {l}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
