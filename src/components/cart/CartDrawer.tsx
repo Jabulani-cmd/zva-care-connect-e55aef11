@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { useShop, formatZAR } from "@/store/shop";
+import { useShop, formatUSD } from "@/store/shop";
 import { getProduct } from "@/data/products";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 
@@ -41,7 +41,7 @@ export function CartDrawer({ open, onOpenChange }: { open: boolean; onOpenChange
                         <span className="w-6 text-center text-sm font-bold">{i.qty}</span>
                         <button onClick={() => updateQty(i.id, i.qty + 1)} className="p-1 hover:bg-muted"><Plus className="h-3 w-3" /></button>
                       </div>
-                      <span className="text-sm font-extrabold">{formatZAR(i.product.price * i.qty)}</span>
+                      <span className="text-sm font-extrabold">{formatUSD(i.product.price * i.qty)}</span>
                     </div>
                   </div>
                   <button onClick={() => removeFromCart(i.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
@@ -52,8 +52,8 @@ export function CartDrawer({ open, onOpenChange }: { open: boolean; onOpenChange
         </div>
         {items.length > 0 && (
           <div className="border-t border-border p-4">
-            <div className="mb-3 flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="font-bold">{formatZAR(subtotal)}</span></div>
-            {subtotal < 500 && <div className="mb-3 rounded-md bg-secondary px-3 py-2 text-xs font-medium text-primary-dark">Add {formatZAR(500 - subtotal)} more for FREE delivery</div>}
+            <div className="mb-3 flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="font-bold">{formatUSD(subtotal)}</span></div>
+            {subtotal < 500 && <div className="mb-3 rounded-md bg-secondary px-3 py-2 text-xs font-medium text-primary-dark">Add {formatUSD(500 - subtotal)} more for FREE delivery</div>}
             <Link to="/cart" onClick={() => onOpenChange(false)} className="mb-2 block rounded-md border border-border py-2.5 text-center text-sm font-bold hover:bg-muted">View Cart</Link>
             <Link to="/checkout" onClick={() => onOpenChange(false)} className="block rounded-md bg-primary py-2.5 text-center text-sm font-bold text-primary-foreground hover:bg-primary-dark">Checkout</Link>
           </div>

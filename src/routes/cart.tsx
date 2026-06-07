@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useShop, formatZAR } from "@/store/shop";
+import { useShop, formatUSD } from "@/store/shop";
 import { getProduct, PRODUCTS } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Minus, Plus, Trash2, Tag, ShoppingBag } from "lucide-react";
@@ -77,7 +77,7 @@ function CartPage() {
                     <button onClick={() => updateQty(i.id, i.qty + 1)} className="p-1.5 hover:bg-muted"><Plus className="h-3 w-3" /></button>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-extrabold">{formatZAR(i.product.price * i.qty)}</div>
+                    <div className="text-lg font-extrabold">{formatUSD(i.product.price * i.qty)}</div>
                     <button onClick={() => removeFromCart(i.id)} className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive"><Trash2 className="h-3 w-3" /> Remove</button>
                   </div>
                 </div>
@@ -90,9 +90,9 @@ function CartPage() {
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
             <h3 className="text-lg font-extrabold">Order Summary</h3>
             <div className="mt-4 space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="font-semibold">{formatZAR(subtotal)}</span></div>
-              {discount > 0 && <div className="flex justify-between text-success"><span>Discount (PLUS10)</span><span>− {formatZAR(discount)}</span></div>}
-              <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span className="font-semibold">{delivery === 0 ? "FREE" : formatZAR(delivery)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="font-semibold">{formatUSD(subtotal)}</span></div>
+              {discount > 0 && <div className="flex justify-between text-success"><span>Discount (PLUS10)</span><span>− {formatUSD(discount)}</span></div>}
+              <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span className="font-semibold">{delivery === 0 ? "FREE" : formatUSD(delivery)}</span></div>
             </div>
             <div className="mt-4 flex gap-2">
               <div className="relative flex-1">
@@ -103,7 +103,7 @@ function CartPage() {
             </div>
             <div className="mt-4 flex items-end justify-between border-t border-border pt-4">
               <span className="text-sm font-bold">Total</span>
-              <span className="text-2xl font-extrabold">{formatZAR(total)}</span>
+              <span className="text-2xl font-extrabold">{formatUSD(total)}</span>
             </div>
             <Link to="/checkout" className="mt-4 block rounded-md bg-primary py-3 text-center font-bold text-primary-foreground hover:bg-primary-dark">Proceed to Checkout →</Link>
             <Link to="/" className="mt-2 block text-center text-sm text-primary hover:underline">Continue Shopping</Link>

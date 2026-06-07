@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Heart, ShoppingCart, Pill } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/data/products";
-import { useShop, formatZAR } from "@/store/shop";
+import { useShop, formatUSD } from "@/store/shop";
 import { ProductImage } from "./ProductImage";
 import { RatingStars } from "./RatingStars";
 
@@ -40,8 +40,8 @@ export function ProductCard({ product }: { product: Product }) {
         </Link>
         <RatingStars rating={product.rating} reviews={product.reviewCount} />
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-base font-bold text-[#111827]">{formatZAR(product.price)}</span>
-          {product.originalPrice && <span className="text-[13px] text-[#9CA3AF] line-through">{formatZAR(product.originalPrice)}</span>}
+          <span className="text-base font-bold text-[#111827]">{formatUSD(product.price)}</span>
+          {product.originalPrice && <span className="text-[13px] text-[#9CA3AF] line-through">{formatUSD(product.originalPrice)}</span>}
         </div>
         <button
           onClick={() => { addToCart(product.id); toast.success("Added to cart"); }}

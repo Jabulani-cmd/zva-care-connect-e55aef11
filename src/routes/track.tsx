@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth, type Order } from "@/store/auth";
-import { formatZAR } from "@/store/shop";
+import { formatUSD } from "@/store/shop";
 import { Search, MapPin, Phone, Truck, Package, CheckCircle2, Circle } from "lucide-react";
 
 export const Route = createFileRoute("/track")({
@@ -42,7 +42,7 @@ function TrackPage() {
               <button key={o.id} onClick={() => setQ(o.id)} className="rounded-xl border border-border bg-card p-4 text-left shadow-sm transition hover:border-primary hover:shadow-md">
                 <div className="text-xs font-bold uppercase text-muted-foreground">{o.date}</div>
                 <div className="mt-1 text-lg font-extrabold">{o.id}</div>
-                <div className="text-sm text-muted-foreground">{o.items.length} item{o.items.length !== 1 ? "s" : ""} · {formatZAR(o.total)}</div>
+                <div className="text-sm text-muted-foreground">{o.items.length} item{o.items.length !== 1 ? "s" : ""} · {formatUSD(o.total)}</div>
                 <StatusPill status={o.status} className="mt-2" />
               </button>
             ))}
@@ -108,13 +108,13 @@ function OrderTracker({ order }: { order: Order }) {
                   <div className="text-sm font-semibold">{it.name}</div>
                   <div className="text-xs text-muted-foreground">Qty {it.qty}</div>
                 </div>
-                <div className="text-sm font-bold">{formatZAR(it.price * it.qty)}</div>
+                <div className="text-sm font-bold">{formatUSD(it.price * it.qty)}</div>
               </li>
             ))}
           </ul>
           <div className="mt-4 flex justify-between border-t border-border pt-3 text-sm font-extrabold">
             <span>Total paid</span>
-            <span>{formatZAR(order.total)}</span>
+            <span>{formatUSD(order.total)}</span>
           </div>
         </div>
       </div>
