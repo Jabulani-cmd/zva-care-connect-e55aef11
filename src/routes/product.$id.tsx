@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { getProduct, PRODUCTS } from "@/data/products";
@@ -6,6 +6,7 @@ import { ProductImage } from "@/components/product/ProductImage";
 import { ProductCard } from "@/components/product/ProductCard";
 import { RatingStars } from "@/components/product/RatingStars";
 import { useShop, formatUSD } from "@/store/shop";
+import { useAuth } from "@/store/auth";
 import { Heart, Minus, Plus, ShoppingCart, ChevronRight, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/product/$id")({
@@ -31,6 +32,9 @@ function ProductPage() {
   const addToCart = useShop((s) => s.addToCart);
   const toggleWishlist = useShop((s) => s.toggleWishlist);
   const wished = useShop((s) => s.wishlist.includes(product.id));
+  const user = useAuth((s) => s.user);
+  const navigate = useNavigate();
+  const location = useRouterState({ select: (s) => s.location });
   const related = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   return (
@@ -87,7 +91,15 @@ function ProductPage() {
               <button onClick={() => setQty(qty + 1)} className="p-3 hover:bg-muted"><Plus className="h-4 w-4" /></button>
             </div>
             <button
-              onClick={() => { addToCart(product.id, qty); toast.success(`Added ${qty} × ${product.brand}`); }}
+              onClick={() => {
+                if (!user) {
+                  toast.info("Please sign in to add items to your cart");
+                  navigate({ to: "/auth", search: { redirect: location.href } });
+                  return;
+                }
+                addToCart(product.id, qty);
+                toast.success(`Added ${qty} × ${product.brand}`);
+              }}
               className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary py-3 font-bold text-primary-foreground transition hover:bg-primary-dark"
             >
               <ShoppingCart className="h-4 w-4" /> Add to Cart
