@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, X, Loader2, ShieldCheck, Smartphone } from "lucide-react";
 import { formatUSD } from "@/store/shop";
 
@@ -188,7 +188,7 @@ function BrandPill({ brand }: { brand: "visa" | "mastercard" | "card" }) {
   return _BrandPillImpl(brand);
 }
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
+function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
