@@ -58,8 +58,20 @@ export function Footer() {
       <div className="bg-primary-dark text-white">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 text-[12px] md:flex-row">
           <div className="text-center text-white/70 md:text-left">
-            <p>© 2025 Plus2 Pharmacy (Pty) Ltd. All Rights Reserved.</p>
-            <p>Registered Pharmacy · MCAZ Accredited · VAT Reg: 4560281733</p>
+            <p>© 2026 Plus2 Pharmacy (Private) Limited. All Rights Reserved.</p>
+            <p>
+              Licensed by the Pharmacists Council of Zimbabwe (PCZ) · MCAZ Accredited ·
+              ZIMRA VAT Reg No. 10045821 · BP No. 2001234567
+            </p>
+            <p className="mt-1">
+              Designed &amp; developed by{" "}
+              <a
+                href="#"
+                className="font-semibold text-white hover:underline"
+              >
+                Mavingtech Business Solutions
+              </a>
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-white/85">
             <span className="rounded bg-white px-2 py-1 text-[10px] font-bold text-[#1A1F71]">VISA</span>
