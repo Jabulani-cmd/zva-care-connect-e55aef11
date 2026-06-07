@@ -55,7 +55,7 @@ function CartPage() {
               <div className="flex flex-1 flex-col">
                 <div className="text-[10px] font-bold uppercase text-muted-foreground">{i.product.brand}</div>
                 <Link to="/product/$id" params={{ id: i.id }} className="font-semibold hover:text-primary">{i.product.name}</Link>
-                <div className="mt-1 text-xs text-success">✓ In stock</div>
+                <div className="mt-1 text-xs text-success">In stock</div>
                 <div className="mt-auto flex items-end justify-between pt-2">
                   <div className="flex items-center gap-1 rounded-md border border-border">
                     <button onClick={() => updateQty(i.id, i.qty - 1)} className="p-1.5 hover:bg-muted"><Minus className="h-3 w-3" /></button>

@@ -87,7 +87,7 @@ function ProductPage() {
               <button onClick={() => setQty(qty + 1)} className="p-3 hover:bg-muted"><Plus className="h-4 w-4" /></button>
             </div>
             <button
-              onClick={() => { addToCart(product.id, qty); toast.success(`✅ Added ${qty} × ${product.brand}`); }}
+              onClick={() => { addToCart(product.id, qty); toast.success(`Added ${qty} × ${product.brand}`); }}
               className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary py-3 font-bold text-primary-foreground transition hover:bg-primary-dark"
             >
               <ShoppingCart className="h-4 w-4" /> Add to Cart

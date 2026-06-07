@@ -116,7 +116,7 @@ function Checkout() {
                   <p className="text-muted-foreground">Enter your registered <strong>{payment.method === "ecocash" ? "EcoCash" : payment.method === "onemoney" ? "OneMoney" : "InnBucks"}</strong> mobile number. We'll send a payment prompt — approve on your phone to complete checkout.</p>
                   <Field label="Mobile number" value={payment.mobile} onChange={(v) => setPayment({ ...payment, mobile: v })} placeholder="+263 77 123 4567" />
                   <div className="rounded-md border border-dashed border-border bg-background p-3 text-xs text-muted-foreground">
-                    💡 Dial *151# (EcoCash) or *111# (OneMoney) if you don't receive a prompt within 60 seconds.
+                    Tip: Dial *151# (EcoCash) or *111# (OneMoney) if you don't receive a prompt within 60 seconds.
                   </div>
                 </div>
               )}

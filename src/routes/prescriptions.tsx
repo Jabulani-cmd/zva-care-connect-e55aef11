@@ -314,7 +314,7 @@ function PrescriptionList({ prescriptions }: { prescriptions: Prescription[] }) 
                       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${s.cls}`}><Icon className="h-3 w-3" /> {p.status}</span>
                     </div>
                     <div className="truncate text-sm text-muted-foreground">{p.fileName} · {p.doctorName} · {p.patientName}</div>
-                    {p.notes && <div className="mt-1 text-xs text-muted-foreground">📝 {p.notes}</div>}
+                    {p.notes && <div className="mt-1 text-xs text-muted-foreground">Note: {p.notes}</div>}
                     <div className="mt-1 text-xs text-muted-foreground">Uploaded {p.uploadedAt} · {s.tip}</div>
                   </div>
                   {p.status === "Approved" && (
