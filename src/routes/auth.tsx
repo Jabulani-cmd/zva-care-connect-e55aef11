@@ -34,7 +34,7 @@ function AuthPage() {
         </ul>
         <div className="mt-10 rounded-lg border border-white/20 bg-white/10 p-4 text-sm backdrop-blur">
           <div className="font-bold">Demo account</div>
-          <div className="mt-1 text-white/90">demo@plus2pharmacy.co.za / <span className="font-mono">Demo1234!</span></div>
+          <div className="mt-1 text-white/90"><span>demo@plus2pharmacy.co.za</span> <span>/</span> <span className="font-mono">Demo1234!</span></div>
         </div>
       </div>
 
