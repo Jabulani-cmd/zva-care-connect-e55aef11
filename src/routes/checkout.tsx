@@ -40,6 +40,10 @@ function Checkout() {
   const next = () => setStep((s) => Math.min(s + 1, 3));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
+  const fillTestCard = (n: string) => setPayment({ ...payment, name: payment.name || "Demo Customer", number: formatCardNumber(n), expiry: "12/27", cvv: "123" });
+  const cardDigits = payment.number.replace(/\s/g, "");
+  const brand = detectBrand(cardDigits);
+
   const makeReceipt = (auth: string | null) => {
     const deliveryLabel = ({ standard: "Standard Delivery", express: "Same-day Express", national: "Nationwide Courier", collect: "Click & Collect" } as Record<string, string>)[delivery_.method] ?? "Standard";
     const addr = delivery_.method === "collect"
@@ -74,10 +78,6 @@ function Checkout() {
     setStep(3);
     toast.success("Order placed");
   };
-
-  const fillTestCard = (n: string) => setPayment({ ...payment, name: payment.name || "Demo Customer", number: formatCardNumber(n), expiry: "12/27", cvv: "123" });
-  const cardDigits = payment.number.replace(/\s/g, "");
-  const brand = detectBrand(cardDigits);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
