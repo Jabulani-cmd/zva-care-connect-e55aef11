@@ -103,7 +103,7 @@ function OrderTracker({ order }: { order: Order }) {
           <ul className="mt-3 divide-y divide-border">
             {order.items.map((it, i) => (
               <li key={i} className="flex items-center gap-3 py-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted text-2xl">{it.emoji}</div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-md border border-border bg-surface text-xs font-bold text-muted-foreground">×{it.qty}</div>
                 <div className="flex-1">
                   <div className="text-sm font-semibold">{it.name}</div>
                   <div className="text-xs text-muted-foreground">Qty {it.qty}</div>
