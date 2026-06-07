@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/store/auth";
 import { Logo } from "@/components/layout/Logo";
-import { ShieldCheck, Truck, Sparkles, Mail, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { ShieldCheck, Truck, Sparkles, Mail, Users, ChevronDown, ChevronUp, KeyRound, CheckCircle2, Loader2 } from "lucide-react";
 import { DEMO_CUSTOMERS } from "@/data/demoAccounts";
 
 type Mode = "login" | "register" | "forgot";
@@ -250,30 +250,144 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
 
 function ForgotForm({ onBack }: { onBack: () => void }) {
   const reset = useAuth((s) => s.resetPassword);
+  type Step = "email" | "sent" | "token" | "password" | "done";
+  const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-  const submit = async (e: React.FormEvent) => {
+  const [demoToken, setDemoToken] = useState("");
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const sendLink = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBusy(true);
     await reset(email);
-    setSent(true);
-    toast.success("Reset link sent — check your inbox.");
+    const t = String(Math.floor(100000 + Math.random() * 900000));
+    setDemoToken(t);
+    setBusy(false);
+    setStep("sent");
+    toast.success("Reset email sent", { description: `Demo token: ${t}` });
   };
-  if (sent)
+
+  const setDigit = (i: number, v: string) => {
+    const d = v.replace(/\D/g, "").slice(-1);
+    const next = [...code];
+    next[i] = d;
+    setCode(next);
+    if (d && i < 5) {
+      const el = document.getElementById(`otp-${i + 1}`) as HTMLInputElement | null;
+      el?.focus();
+    }
+  };
+
+  const verifyToken = (e: React.FormEvent) => {
+    e.preventDefault();
+    const entered = code.join("");
+    if (entered.length !== 6) return toast.error("Enter the 6-digit code");
+    if (entered !== demoToken) return toast.error("Invalid token. Try the demo code shown above.");
+    setStep("password");
+  };
+
+  const savePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 8) return toast.error("Password must be at least 8 characters");
+    if (password !== confirm) return toast.error("Passwords don't match");
+    setBusy(true);
+    await new Promise((r) => setTimeout(r, 900));
+    setBusy(false);
+    setStep("done");
+    toast.success("Password updated successfully");
+  };
+
+  if (step === "email") {
+    return (
+      <form onSubmit={sendLink} className="space-y-4">
+        <h1 className="text-2xl font-extrabold">Reset your password</h1>
+        <p className="-mt-2 text-sm text-muted-foreground">Enter your email and we'll send you a secure 6-digit reset code.</p>
+        <Field label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-md bg-primary py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground hover:bg-primary-dark disabled:opacity-60">
+          {busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Sending…</> : "Send reset code"}
+        </button>
+        <button type="button" onClick={onBack} className="w-full text-sm font-semibold text-primary hover:underline">← Back to sign in</button>
+      </form>
+    );
+  }
+
+  if (step === "sent") {
     return (
       <div className="space-y-4 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-success/15 text-success"><Mail className="h-7 w-7" /></div>
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/15 text-success"><Mail className="h-7 w-7" /></div>
         <h2 className="text-xl font-extrabold">Check your email</h2>
-        <p className="text-sm text-muted-foreground">We sent a password reset link to <strong>{email}</strong>.</p>
-        <button onClick={onBack} className="rounded-md border border-border px-4 py-2 text-sm font-bold hover:bg-muted">Back to sign in</button>
+        <p className="text-sm text-muted-foreground">We sent a 6-digit reset code to <strong>{email}</strong>.</p>
+        <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4 text-left">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-primary">Demo Inbox</div>
+          <div className="mt-1 text-sm text-foreground">Your Plus2 password reset code is:</div>
+          <div className="mt-2 font-mono text-3xl font-extrabold tracking-[0.4em] text-primary">{demoToken}</div>
+          <div className="mt-2 text-xs text-muted-foreground">Code expires in 10 minutes.</div>
+        </div>
+        <button onClick={() => setStep("token")} className="w-full rounded-md bg-primary py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground hover:bg-primary-dark">Enter code</button>
+        <button onClick={onBack} className="w-full text-sm font-semibold text-primary hover:underline">← Back to sign in</button>
       </div>
     );
+  }
+
+  if (step === "token") {
+    return (
+      <form onSubmit={verifyToken} className="space-y-4 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"><KeyRound className="h-7 w-7" /></div>
+        <h2 className="text-xl font-extrabold">Enter reset code</h2>
+        <p className="-mt-2 text-sm text-muted-foreground">6-digit code sent to <strong>{email}</strong></p>
+        <div className="flex justify-center gap-2">
+          {code.map((d, i) => (
+            <input
+              key={i}
+              id={`otp-${i}`}
+              inputMode="numeric"
+              maxLength={1}
+              value={d}
+              onChange={(e) => setDigit(i, e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Backspace" && !code[i] && i > 0) {
+                  const el = document.getElementById(`otp-${i - 1}`) as HTMLInputElement | null;
+                  el?.focus();
+                }
+              }}
+              className="h-12 w-10 rounded-md border border-input bg-background text-center font-mono text-lg font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          ))}
+        </div>
+        <button className="w-full rounded-md bg-primary py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground hover:bg-primary-dark">Verify code</button>
+        <div className="flex items-center justify-between text-xs">
+          <button type="button" onClick={onBack} className="font-semibold text-primary hover:underline">← Cancel</button>
+          <button type="button" onClick={() => { setStep("email"); setCode(["","","","","",""]); }} className="font-semibold text-primary hover:underline">Resend code</button>
+        </div>
+      </form>
+    );
+  }
+
+  if (step === "password") {
+    return (
+      <form onSubmit={savePassword} className="space-y-4">
+        <h1 className="text-2xl font-extrabold">Set new password</h1>
+        <p className="-mt-2 text-sm text-muted-foreground">Pick a strong password you haven't used before.</p>
+        <Field label="New password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Field label="Confirm password" type="password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+        <button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-md bg-primary py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground hover:bg-primary-dark disabled:opacity-60">
+          {busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Updating…</> : "Update password"}
+        </button>
+      </form>
+    );
+  }
+
   return (
-    <form onSubmit={submit} className="space-y-4">
-      <h1 className="text-2xl font-extrabold">Reset your password</h1>
-      <p className="-mt-2 text-sm text-muted-foreground">Enter your email and we'll send you a reset link.</p>
-      <Field label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-      <button className="w-full rounded-md bg-primary py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground hover:bg-primary-dark">Send reset link</button>
-      <button type="button" onClick={onBack} className="w-full text-sm font-semibold text-primary hover:underline">← Back to sign in</button>
-    </form>
+    <div className="space-y-4 text-center">
+      <div className="mx-auto flex h-16 w-16 animate-in zoom-in items-center justify-center rounded-full bg-success/15 text-success">
+        <CheckCircle2 className="h-9 w-9" />
+      </div>
+      <h2 className="text-2xl font-extrabold">Password reset!</h2>
+      <p className="text-sm text-muted-foreground">Your password has been updated for <strong>{email}</strong>. You can now sign in with your new password.</p>
+      <button onClick={onBack} className="w-full rounded-md bg-primary py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground hover:bg-primary-dark">Back to sign in</button>
+    </div>
   );
 }
