@@ -8,6 +8,57 @@ import { DEMO_CUSTOMERS } from "@/data/demoAccounts";
 
 type Mode = "login" | "register" | "forgot";
 
+function BrandMark({ size = 72 }: { size?: number }) {
+  return (
+    <div
+      className="relative flex items-center justify-center rounded-3xl bg-white text-primary shadow-2xl ring-1 ring-black/5"
+      style={{ width: size, height: size }}
+    >
+      <span
+        className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white to-emerald-50"
+        aria-hidden
+      />
+      <span
+        className="relative font-black leading-none"
+        style={{ fontSize: size * 0.62 }}
+      >
+        +
+      </span>
+      <span
+        className="absolute -right-1 -top-1 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow"
+      >
+        Rx
+      </span>
+    </div>
+  );
+}
+
+function BrandLockup({ compact = false }: { compact?: boolean }) {
+  const onDark = !compact;
+  return (
+    <div className={`flex items-center gap-4 ${compact ? "" : ""}`}>
+      <BrandMark size={compact ? 56 : 88} />
+      <div className="flex flex-col leading-none">
+        <span
+          className={`font-black tracking-tight ${onDark ? "text-white" : "text-primary"} ${compact ? "text-3xl" : "text-5xl"}`}
+        >
+          Plus<span className="text-emerald-300">2</span>
+        </span>
+        <span
+          className={`mt-2 font-bold tracking-[0.25em] ${onDark ? "text-white/80" : "text-muted-foreground"} ${compact ? "text-[10px]" : "text-xs"}`}
+        >
+          PHARMACY
+        </span>
+        <span
+          className={`mt-1 tracking-[0.2em] ${onDark ? "text-white/60" : "text-muted-foreground/80"} ${compact ? "text-[8px]" : "text-[10px]"}`}
+        >
+          YOUR HEALTH · OUR PRIORITY
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in or Register — Plus2 Pharmacy" }] }),
   component: AuthPage,
