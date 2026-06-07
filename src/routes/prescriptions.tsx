@@ -202,28 +202,26 @@ function Step1Files({ files, setFiles }: { files: LocalFile[]; setFiles: (f: Loc
         <p className="text-sm text-[#6B7280]">Choose how you'd like to upload — most patients photograph their script.</p>
       </div>
 
-      {/* Mobile: method cards */}
-      <div className="space-y-3 md:hidden">
-        <MethodCard icon={Camera} title="Take a Photo" subtitle="Use your phone camera to photograph your script" onClick={() => cameraRef.current?.click()} />
+      {/* Method cards — available on every viewport */}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <MethodCard icon={Camera} title="Take a Photo" subtitle="Use your phone or webcam to photograph your script" onClick={() => cameraRef.current?.click()} />
         <MethodCard icon={ImageIcon} title="Choose from Gallery or Files" subtitle="Select a photo, PDF or image saved on your device" onClick={() => galleryRef.current?.click()} />
         <MethodCard icon={Mail} title="From Email or Cloud Storage" subtitle="Access files from Gmail, Outlook, Google Drive or iCloud" onClick={() => cloudRef.current?.click()} />
-        <p className="px-1 text-[11px] text-[#9CA3AF]">Tip: In Gmail, open the email with your script → tap the attachment → tap Share → save to Files first, then return here.</p>
       </div>
+      <p className="px-1 text-[11px] text-[#9CA3AF]">Tip: In Gmail, open the email with your script → tap the attachment → save to Files first, then return here.</p>
 
-      {/* Desktop: dropzone */}
+      {/* Desktop: dropzone (secondary) */}
       <div
         onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("border-primary", "bg-[#F0F9F4]"); }}
         onDragLeave={(e) => e.currentTarget.classList.remove("border-primary", "bg-[#F0F9F4]")}
         onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove("border-primary", "bg-[#F0F9F4]"); handleFiles(e.dataTransfer.files); }}
-        className="hidden h-[200px] cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-[#D1D5DB] bg-[#F9FAFB] transition hover:border-primary hover:bg-[#F0F9F4] md:flex"
+        className="hidden h-[160px] cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-[#D1D5DB] bg-[#F9FAFB] transition hover:border-primary hover:bg-[#F0F9F4] md:flex"
         onClick={() => galleryRef.current?.click()}
       >
         <div className="text-center">
-          <Upload className="mx-auto h-10 w-10 text-[#9CA3AF]" />
-          <div className="mt-2 text-base font-semibold text-[#374151]">Drag your prescription here</div>
-          <div className="text-sm text-[#9CA3AF]">or</div>
-          <button type="button" onClick={(e) => { e.stopPropagation(); galleryRef.current?.click(); }} className="mt-2 rounded-md border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-[#F0F9F4]">Browse Files</button>
-          <div className="mt-2 text-xs text-[#9CA3AF]">Accepts JPG, PNG, PDF — Max 10MB per file</div>
+          <Upload className="mx-auto h-8 w-8 text-[#9CA3AF]" />
+          <div className="mt-2 text-sm font-semibold text-[#374151]">Or drag &amp; drop files here</div>
+          <div className="mt-1 text-xs text-[#9CA3AF]">Accepts JPG, PNG, PDF — Max 10MB per file</div>
         </div>
       </div>
 
