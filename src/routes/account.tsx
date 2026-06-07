@@ -6,7 +6,6 @@ import { useAuth, type Order } from "@/store/auth";
 import { getProduct } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Package, Heart, MapPin, Settings, LayoutDashboard, FileText, Truck, LogOut, Phone, Syringe, Store, Receipt as ReceiptIcon } from "lucide-react";
-import { useState as useState2 } from "react";
 import { ReceiptModal } from "@/components/receipt/ReceiptModal";
 import { buildReceipt, type Receipt } from "@/lib/receipts";
 
@@ -23,7 +22,7 @@ function AccountPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<"dash" | "orders" | "scripts" | "wishlist" | "card" | "address" | "settings">("dash");
   const wishlist = useShop((s) => s.wishlist).map(getProduct).filter(Boolean);
-  const [activeReceipt, setActiveReceipt] = useState2<Receipt | null>(null);
+  const [activeReceipt, setActiveReceipt] = useState<Receipt | null>(null);
 
   const openReceiptFor = (orderId: string) => {
     const o = orders.find((x) => x.id === orderId);
