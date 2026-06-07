@@ -30,7 +30,6 @@ export function Navbar() {
       <div className="hidden bg-[#F9FAFB] text-[#374151] md:block border-b border-[#E5E7EB]">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-[12px]">
           <div className="flex items-center gap-5">
-            <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Find a Store</span>
             <span className="flex items-center gap-1.5"><Truck className="h-3.5 w-3.5" /> Free delivery over US$50</span>
             <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> +263 78 200 0100</span>
           </div>
