@@ -1,0 +1,163 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+export type User = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  points: number;
+  tier: "Silver" | "Gold" | "Platinum";
+};
+
+export type Prescription = {
+  id: string;
+  fileName: string;
+  patientName: string;
+  doctorName: string;
+  notes?: string;
+  status: "Pending" | "Approved" | "Dispensed" | "Rejected";
+  uploadedAt: string;
+};
+
+export type TrackingEvent = { label: string; at: string; done: boolean };
+export type Order = {
+  id: string;
+  date: string;
+  total: number;
+  status: "Processing" | "Packed" | "Out for delivery" | "Delivered";
+  items: { name: string; qty: number; price: number; emoji: string }[];
+  address: string;
+  tracking: TrackingEvent[];
+  driver?: { name: string; phone: string; vehicle: string };
+};
+
+type AuthState = {
+  user: User | null;
+  prescriptions: Prescription[];
+  orders: Order[];
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  register: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string }) => Promise<{ ok: boolean; error?: string }>;
+  logout: () => void;
+  resetPassword: (email: string) => Promise<{ ok: boolean }>;
+  addPrescription: (p: Omit<Prescription, "id" | "status" | "uploadedAt">) => void;
+};
+
+const DEMO_ORDERS: Order[] = [
+  {
+    id: "P2-184221",
+    date: "12 May 2026",
+    total: 489.97,
+    status: "Delivered",
+    items: [
+      { name: "Panado 500mg 24s", qty: 2, price: 39.99, emoji: "💊" },
+      { name: "Centrum Multivitamin 30s", qty: 1, price: 209.99, emoji: "🌿" },
+      { name: "Nivea Body Lotion 400ml", qty: 1, price: 99.99, emoji: "🧴" },
+    ],
+    address: "42 Long Street, Gardens, Cape Town 8001",
+    tracking: [
+      { label: "Order placed", at: "12 May, 09:14", done: true },
+      { label: "Packed at pharmacy", at: "12 May, 10:42", done: true },
+      { label: "Out for delivery", at: "12 May, 12:08", done: true },
+      { label: "Delivered", at: "12 May, 14:23", done: true },
+    ],
+  },
+  {
+    id: "P2-183904",
+    date: "28 Apr 2026",
+    total: 234.5,
+    status: "Out for delivery",
+    items: [
+      { name: "Allergex 30s", qty: 1, price: 64.99, emoji: "💊" },
+      { name: "Vicks VapoRub 50g", qty: 1, price: 79.99, emoji: "🧴" },
+    ],
+    address: "42 Long Street, Gardens, Cape Town 8001",
+    tracking: [
+      { label: "Order placed", at: "07 Jun, 08:02", done: true },
+      { label: "Packed at pharmacy", at: "07 Jun, 09:31", done: true },
+      { label: "Out for delivery", at: "07 Jun, 11:15", done: true },
+      { label: "Delivered", at: "Est. today, 15:00", done: false },
+    ],
+    driver: { name: "Sipho M.", phone: "+27 82 555 0119", vehicle: "Toyota Hilux · CA 482-991" },
+  },
+  {
+    id: "P2-182117",
+    date: "06 Jun 2026",
+    total: 1289.0,
+    status: "Packed",
+    items: [
+      { name: "Omron Blood Pressure Monitor", qty: 1, price: 1289.0, emoji: "🩺" },
+    ],
+    address: "42 Long Street, Gardens, Cape Town 8001",
+    tracking: [
+      { label: "Order placed", at: "06 Jun, 19:47", done: true },
+      { label: "Packed at pharmacy", at: "07 Jun, 07:21", done: true },
+      { label: "Out for delivery", at: "Pending", done: false },
+      { label: "Delivered", at: "Pending", done: false },
+    ],
+  },
+];
+
+const DEMO_PRESCRIPTIONS: Prescription[] = [
+  { id: "RX-90211", fileName: "script-may-2026.pdf", patientName: "Thandi Nkosi", doctorName: "Dr A. Mokoena", status: "Dispensed", uploadedAt: "10 May 2026" },
+  { id: "RX-90415", fileName: "chronic-bp.jpg", patientName: "Thandi Nkosi", doctorName: "Dr S. Patel", status: "Approved", uploadedAt: "02 Jun 2026", notes: "Repeat for 3 months" },
+  { id: "RX-90510", fileName: "antibiotic.pdf", patientName: "Thandi Nkosi", doctorName: "Dr R. Naidoo", status: "Pending", uploadedAt: "06 Jun 2026" },
+];
+
+const DEMO_USER: User = {
+  id: "u_demo",
+  email: "demo@plus2pharmacy.co.za",
+  firstName: "Thandi",
+  lastName: "Nkosi",
+  phone: "+27 82 123 4567",
+  points: 2450,
+  tier: "Gold",
+};
+
+export const useAuth = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      prescriptions: DEMO_PRESCRIPTIONS,
+      orders: DEMO_ORDERS,
+      login: async (email, password) => {
+        await new Promise((r) => setTimeout(r, 500));
+        if (!email || !password) return { ok: false, error: "Email and password are required" };
+        if (password.length < 6) return { ok: false, error: "Invalid email or password" };
+        const user: User = email.toLowerCase() === DEMO_USER.email
+          ? DEMO_USER
+          : { ...DEMO_USER, id: "u_" + Date.now(), email, firstName: email.split("@")[0] };
+        set({ user });
+        return { ok: true };
+      },
+      register: async ({ email, password, firstName, lastName, phone }) => {
+        await new Promise((r) => setTimeout(r, 600));
+        if (!email.includes("@")) return { ok: false, error: "Enter a valid email" };
+        if (password.length < 8) return { ok: false, error: "Password must be at least 8 characters" };
+        set({
+          user: { id: "u_" + Date.now(), email, firstName, lastName, phone, points: 250, tier: "Silver" },
+        });
+        return { ok: true };
+      },
+      logout: () => set({ user: null }),
+      resetPassword: async () => {
+        await new Promise((r) => setTimeout(r, 400));
+        return { ok: true };
+      },
+      addPrescription: (p) =>
+        set({
+          prescriptions: [
+            {
+              id: "RX-" + Math.floor(90000 + Math.random() * 9999),
+              status: "Pending",
+              uploadedAt: new Date().toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" }),
+              ...p,
+            },
+            ...get().prescriptions,
+          ],
+        }),
+    }),
+    { name: "plus2-auth", partialize: (s) => ({ user: s.user, prescriptions: s.prescriptions }) }
+  )
+);
