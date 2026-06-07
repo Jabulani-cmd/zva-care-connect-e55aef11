@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, X, Loader2, ShieldCheck, Smartphone } from "lucide-react";
 import { formatUSD } from "@/store/shop";
 
@@ -132,13 +132,34 @@ export function PaymentSimulator({ open, amount, cardNumber, cardholder, brand, 
         )}
 
         {stage === "success" && (
-          <div className="mt-6 flex flex-col items-center text-center animate-scale-in">
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-success/15">
-              <Check className="h-9 w-9 text-success" strokeWidth={3} />
-              <span className="absolute inset-0 rounded-full bg-success/30 animate-ping" />
+          <div className="mt-6 animate-scale-in">
+            <div className="flex flex-col items-center text-center">
+              <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-success/15">
+                <Check className="h-9 w-9 text-success" strokeWidth={3} />
+                <span className="absolute inset-0 rounded-full bg-success/30 animate-ping" />
+              </div>
+              <h3 className="mt-4 text-lg font-extrabold text-foreground">Payment Authorised</h3>
+              <p className="mt-1 text-xs text-muted-foreground">Your transaction has been approved</p>
             </div>
-            <h3 className="mt-4 text-lg font-extrabold text-foreground">Payment Authorised</h3>
-            <p className="mt-1 text-xs text-muted-foreground">Ref: <span className="font-mono font-bold text-foreground">{authRef}</span></p>
+
+            <div className="mt-5 rounded-lg border-2 border-dashed border-success/40 bg-success/5 p-4">
+              <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Payment Receipt</span>
+                <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-extrabold uppercase text-success">Approved</span>
+              </div>
+              <dl className="mt-3 space-y-2 text-xs">
+                <Row label="Auth Reference" value={<span className="font-mono font-extrabold text-foreground">{authRef}</span>} />
+                <Row label="Cardholder" value={<span className="font-semibold text-foreground">{cardholder || "—"}</span>} />
+                <Row label="Card" value={<span className="font-mono font-semibold text-foreground">•••• •••• •••• {last4 || "••••"}</span>} />
+                <Row label="Brand" value={<span className="font-semibold uppercase text-foreground">{brand}</span>} />
+                <Row label="Method" value={<span className="font-semibold text-foreground">3-D Secure</span>} />
+                <Row label="Date" value={<span className="font-semibold text-foreground">{new Date().toLocaleString()}</span>} />
+                <div className="mt-2 flex items-center justify-between border-t border-border/60 pt-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Amount Paid</span>
+                  <span className="text-base font-extrabold text-success">{formatUSD(amount)}</span>
+                </div>
+              </dl>
+            </div>
           </div>
         )}
 
@@ -164,6 +185,19 @@ export function PaymentSimulator({ open, amount, cardNumber, cardholder, brand, 
 }
 
 function BrandPill({ brand }: { brand: "visa" | "mastercard" | "card" }) {
+  return _BrandPillImpl(brand);
+}
+
+function Row({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd>{value}</dd>
+    </div>
+  );
+}
+
+function _BrandPillImpl(brand: "visa" | "mastercard" | "card") {
   if (brand === "visa") return <span className="rounded bg-[#1A1F71] px-2 py-1 text-[10px] font-extrabold italic text-white">VISA</span>;
   if (brand === "mastercard")
     return (
