@@ -1,40 +1,54 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useShop, formatZAR } from "@/store/shop";
+import { useAuth, type Order } from "@/store/auth";
 import { getProduct } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
-import { Award, Package, Heart, MapPin, Settings, LayoutDashboard } from "lucide-react";
+import { Award, Package, Heart, MapPin, Settings, LayoutDashboard, FileText, Truck, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/account")({
   head: () => ({ meta: [{ title: "My Account — Plus2 Pharmacy" }] }),
   component: AccountPage,
 });
 
-const ORDERS = [
-  { no: "P2-184221", date: "12 May 2026", status: "Delivered", total: 489.97 },
-  { no: "P2-183904", date: "28 Apr 2026", status: "Shipped", total: 234.5 },
-  { no: "P2-182117", date: "14 Apr 2026", status: "Processing", total: 1289.0 },
-];
-
 function AccountPage() {
-  const [tab, setTab] = useState<"dash" | "orders" | "wishlist" | "card" | "address" | "settings">("dash");
+  const user = useAuth((s) => s.user);
+  const orders = useAuth((s) => s.orders);
+  const prescriptions = useAuth((s) => s.prescriptions);
+  const logout = useAuth((s) => s.logout);
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<"dash" | "orders" | "scripts" | "wishlist" | "card" | "address" | "settings">("dash");
   const wishlist = useShop((s) => s.wishlist).map(getProduct).filter(Boolean);
+
+  useEffect(() => {
+    if (!user) navigate({ to: "/auth" });
+  }, [user, navigate]);
+  if (!user) return null;
 
   const tabs = [
     { id: "dash", label: "Dashboard", icon: LayoutDashboard },
     { id: "orders", label: "Orders", icon: Package },
+    { id: "scripts", label: "Prescriptions", icon: FileText },
     { id: "wishlist", label: "Wishlist", icon: Heart },
     { id: "card", label: "Benefit Card", icon: Award },
     { id: "address", label: "Addresses", icon: MapPin },
     { id: "settings", label: "Settings", icon: Settings },
   ] as const;
 
+  const onLogout = () => { logout(); toast.success("Signed out"); navigate({ to: "/" }); };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
       <div className="rounded-2xl bg-gradient-to-r from-primary to-primary-dark p-6 text-primary-foreground shadow-lg">
-        <div className="text-xs font-bold uppercase tracking-wider opacity-90">Welcome back</div>
-        <h1 className="mt-1 text-2xl font-extrabold md:text-3xl">Hi, Thandi 👋</h1>
-        <p className="mt-1 text-sm opacity-95">You have <strong>2,450 points</strong> ready to redeem.</p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider opacity-90">Welcome back</div>
+            <h1 className="mt-1 text-2xl font-extrabold md:text-3xl">Hi, {user.firstName} 👋</h1>
+            <p className="mt-1 text-sm opacity-95">You have <strong>{user.points.toLocaleString()} points</strong> ready to redeem · {user.tier} tier</p>
+          </div>
+          <button onClick={onLogout} className="inline-flex items-center gap-2 rounded-md bg-white/15 px-3 py-1.5 text-xs font-bold backdrop-blur hover:bg-white/25"><LogOut className="h-4 w-4" /> Sign out</button>
+        </div>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[220px_1fr]">
@@ -54,23 +68,34 @@ function AccountPage() {
         <div>
           {tab === "dash" && (
             <div className="grid gap-4 sm:grid-cols-2">
-              <BenefitCard />
+              <BenefitCard name={`${user.firstName} ${user.lastName}`} points={user.points} tier={user.tier} />
               <div className="rounded-xl border border-border bg-card p-5">
-                <h3 className="font-extrabold">Recent Order</h3>
-                <div className="mt-3 text-sm">
-                  <div className="font-bold">{ORDERS[0].no}</div>
-                  <div className="text-muted-foreground">{ORDERS[0].date} · {formatZAR(ORDERS[0].total)}</div>
-                  <span className="mt-2 inline-block rounded-full bg-success/10 px-2 py-0.5 text-xs font-bold text-success">{ORDERS[0].status}</span>
-                </div>
-                <button onClick={() => setTab("orders")} className="mt-4 text-sm font-bold text-primary hover:underline">View all orders →</button>
+                <h3 className="font-extrabold">Active delivery</h3>
+                {(() => {
+                  const active = orders.find((o) => o.status !== "Delivered");
+                  if (!active) return <p className="mt-3 text-sm text-muted-foreground">No active deliveries.</p>;
+                  return (
+                    <div className="mt-3 text-sm">
+                      <div className="font-bold">{active.id}</div>
+                      <div className="text-muted-foreground">{active.date} · {formatZAR(active.total)}</div>
+                      <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">{active.status}</span>
+                      <Link to="/track" search={{ order: active.id }} className="mt-3 flex items-center gap-1 text-sm font-bold text-primary hover:underline"><Truck className="h-4 w-4" /> Track delivery →</Link>
+                    </div>
+                  );
+                })()}
               </div>
               <div className="rounded-xl border border-border bg-card p-5 sm:col-span-2">
                 <h3 className="font-extrabold">Quick Links</h3>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <Link to="/services" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">📋 Script Repeat</Link>
+                  <Link to="/prescriptions" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">📋 Upload Script</Link>
+                  <Link to="/track" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">🚚 Track Order</Link>
                   <Link to="/services" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">💉 Vaccinations</Link>
-                  <Link to="/services" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">🩺 Health Check</Link>
                   <Link to="/services" className="rounded-lg bg-surface p-3 text-center text-sm font-semibold hover:bg-muted">📍 Find Store</Link>
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-4 text-center">
+                  <Stat label="Orders" value={orders.length} />
+                  <Stat label="Pending scripts" value={prescriptions.filter((p) => p.status === "Pending").length} />
+                  <Stat label="Wishlist" value={wishlist.length} />
                 </div>
               </div>
             </div>
@@ -82,17 +107,37 @@ function AccountPage() {
                   <tr><th className="px-4 py-3">Order</th><th className="px-4 py-3">Date</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Total</th><th className="px-4 py-3"></th></tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {ORDERS.map((o) => (
-                    <tr key={o.no}>
-                      <td className="px-4 py-3 font-bold">{o.no}</td>
+                  {orders.map((o) => (
+                    <tr key={o.id}>
+                      <td className="px-4 py-3 font-bold">{o.id}</td>
                       <td className="px-4 py-3 text-muted-foreground">{o.date}</td>
-                      <td className="px-4 py-3"><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${o.status === "Delivered" ? "bg-success/10 text-success" : o.status === "Shipped" ? "bg-primary/10 text-primary" : "bg-warning/20 text-foreground"}`}>{o.status}</span></td>
+                      <td className="px-4 py-3"><StatusPill status={o.status} /></td>
                       <td className="px-4 py-3 font-bold">{formatZAR(o.total)}</td>
-                      <td className="px-4 py-3 text-right"><a href="#" className="text-sm font-bold text-primary hover:underline">View →</a></td>
+                      <td className="px-4 py-3 text-right"><Link to="/track" search={{ order: o.id }} className="text-sm font-bold text-primary hover:underline">Track →</Link></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {tab === "scripts" && (
+            <div className="rounded-xl border border-border bg-card p-5">
+              <div className="flex items-center justify-between">
+                <h3 className="font-extrabold">My Prescriptions</h3>
+                <Link to="/prescriptions" className="rounded-md bg-primary px-3 py-1.5 text-xs font-bold uppercase text-primary-foreground hover:bg-primary-dark">+ Upload</Link>
+              </div>
+              <ul className="mt-4 divide-y divide-border">
+                {prescriptions.map((p) => (
+                  <li key={p.id} className="flex items-center gap-3 py-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary"><FileText className="h-5 w-5" /></div>
+                    <div className="flex-1">
+                      <div className="text-sm font-bold">{p.id} · {p.fileName}</div>
+                      <div className="text-xs text-muted-foreground">{p.doctorName} · {p.uploadedAt}</div>
+                    </div>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${p.status === "Approved" ? "bg-primary/10 text-primary" : p.status === "Dispensed" ? "bg-success/15 text-success" : p.status === "Rejected" ? "bg-destructive/10 text-destructive" : "bg-warning/15 text-foreground"}`}>{p.status}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
           {tab === "wishlist" && (
@@ -100,22 +145,28 @@ function AccountPage() {
               ? <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">Nothing wishlisted yet.</div>
               : <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{wishlist.map((p) => <ProductCard key={p!.id} product={p!} />)}</div>
           )}
-          {tab === "card" && <BenefitCard large />}
+          {tab === "card" && <BenefitCard large name={`${user.firstName} ${user.lastName}`} points={user.points} tier={user.tier} />}
           {tab === "address" && (
             <div className="rounded-xl border border-border bg-card p-5">
               <h3 className="font-extrabold">Default Address</h3>
-              <p className="mt-2 text-sm text-muted-foreground">Thandi Nkosi<br />42 Long Street, Gardens<br />Cape Town, 8001</p>
+              <p className="mt-2 text-sm text-muted-foreground">{user.firstName} {user.lastName}<br />42 Long Street, Gardens<br />Cape Town, 8001</p>
               <button className="mt-4 rounded-md border border-border px-4 py-2 text-sm font-bold hover:bg-muted">Edit</button>
             </div>
           )}
           {tab === "settings" && (
             <div className="rounded-xl border border-border bg-card p-5">
-              <h3 className="font-extrabold">Notifications</h3>
+              <h3 className="font-extrabold">Account</h3>
+              <div className="mt-3 grid gap-2 text-sm">
+                <div><span className="text-muted-foreground">Email:</span> <strong>{user.email}</strong></div>
+                {user.phone && <div><span className="text-muted-foreground">Mobile:</span> <strong>{user.phone}</strong></div>}
+              </div>
+              <h3 className="mt-6 font-extrabold">Notifications</h3>
               <div className="mt-3 space-y-2 text-sm">
                 <label className="flex items-center gap-2"><input type="checkbox" defaultChecked /> Order updates</label>
                 <label className="flex items-center gap-2"><input type="checkbox" defaultChecked /> Promotions & deals</label>
                 <label className="flex items-center gap-2"><input type="checkbox" /> Health tips newsletter</label>
               </div>
+              <button onClick={onLogout} className="mt-6 inline-flex items-center gap-2 rounded-md border border-destructive/40 px-4 py-2 text-sm font-bold text-destructive hover:bg-destructive/10"><LogOut className="h-4 w-4" /> Sign out</button>
             </div>
           )}
         </div>
@@ -124,21 +175,35 @@ function AccountPage() {
   );
 }
 
-function BenefitCard({ large = false }: { large?: boolean }) {
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg bg-surface p-3">
+      <div className="text-2xl font-extrabold text-primary">{value}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function StatusPill({ status }: { status: Order["status"] }) {
+  const cls = status === "Delivered" ? "bg-success/15 text-success" : status === "Out for delivery" ? "bg-accent/15 text-accent-foreground" : status === "Packed" ? "bg-primary/10 text-primary" : "bg-warning/20 text-foreground";
+  return <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${cls}`}>{status}</span>;
+}
+
+function BenefitCard({ large = false, name, points, tier }: { large?: boolean; name: string; points: number; tier: string }) {
   return (
     <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-dark to-foreground p-5 text-primary-foreground shadow-lg ${large ? "max-w-md" : ""}`}>
       <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-accent/30 blur-2xl" />
       <div className="relative">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider opacity-90">Plus2 Benefit Card</span>
-          <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-accent-foreground">GOLD</span>
+          <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-accent-foreground">{tier.toUpperCase()}</span>
         </div>
-        <div className="mt-6 text-3xl font-extrabold">2,450 pts</div>
-        <div className="mt-1 text-sm opacity-90">Worth R245.00 in savings</div>
+        <div className="mt-6 text-3xl font-extrabold">{points.toLocaleString()} pts</div>
+        <div className="mt-1 text-sm opacity-90">Worth R{(points / 10).toFixed(2)} in savings</div>
         <div className="mt-6 flex items-end justify-between">
           <div>
             <div className="text-[10px] uppercase opacity-75">Member</div>
-            <div className="font-bold">Thandi Nkosi</div>
+            <div className="font-bold">{name}</div>
           </div>
           <button className="rounded-md bg-white/20 px-3 py-1.5 text-xs font-bold backdrop-blur hover:bg-white/30">Redeem →</button>
         </div>
