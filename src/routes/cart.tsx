@@ -49,7 +49,9 @@ function CartPage() {
         <ul className="space-y-3">
           {items.map((i) => (
             <li key={i.id} className="flex gap-4 rounded-xl border border-border bg-card p-4">
-              <Link to="/product/$id" params={{ id: i.id }} className="flex h-24 w-24 shrink-0 items-center justify-center rounded-lg text-4xl" style={{ background: i.product.bg }}>{i.product.emoji}</Link>
+              <Link to="/product/$id" params={{ id: i.id }} className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-[#F9FAFB]">
+                <img src={i.product.image} alt={i.product.name} className="h-full w-full object-contain p-2" loading="lazy" />
+              </Link>
               <div className="flex flex-1 flex-col">
                 <div className="text-[10px] font-bold uppercase text-muted-foreground">{i.product.brand}</div>
                 <Link to="/product/$id" params={{ id: i.id }} className="font-semibold hover:text-primary">{i.product.name}</Link>
