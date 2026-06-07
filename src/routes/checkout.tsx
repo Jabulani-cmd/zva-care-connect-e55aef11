@@ -155,7 +155,9 @@ function Checkout() {
               <div className="mt-4 space-y-3">
                 {items.map((i) => (
                   <div key={i.id} className="flex items-center gap-3 border-b border-border pb-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-md text-xl" style={{ background: i.product.bg }}>{i.product.emoji}</div>
+                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border border-border bg-[#F9FAFB]">
+                      <img src={i.product.image} alt={i.product.name} className="h-full w-full object-contain p-1" loading="lazy" />
+                    </div>
                     <div className="flex-1"><div className="text-sm font-bold">{i.product.name}</div><div className="text-xs text-muted-foreground">Qty: {i.qty}</div></div>
                     <div className="font-bold">{formatZAR(i.product.price * i.qty)}</div>
                   </div>

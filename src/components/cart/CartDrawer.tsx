@@ -29,7 +29,9 @@ export function CartDrawer({ open, onOpenChange }: { open: boolean; onOpenChange
             <ul className="divide-y divide-border">
               {items.map((i) => (
                 <li key={i.id} className="flex gap-3 p-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg text-2xl" style={{ background: i.product.bg }}>{i.product.emoji}</div>
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-[#F9FAFB]">
+                    <img src={i.product.image} alt={i.product.name} className="h-full w-full object-contain p-1.5" loading="lazy" />
+                  </div>
                   <div className="flex flex-1 flex-col">
                     <div className="text-[10px] font-bold uppercase text-muted-foreground">{i.product.brand}</div>
                     <div className="line-clamp-2 text-sm font-semibold">{i.product.name}</div>
