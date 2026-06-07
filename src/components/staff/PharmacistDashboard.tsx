@@ -2,13 +2,8 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { STAFF_RX_QUEUE, type StaffRxQueueItem } from "@/data/staffDemo";
 import { useAuth } from "@/store/auth";
-import type { Quotation } from "@/store/auth";
-import {
-  PageHeader,
-  KPI,
-  Card,
-  StatusPill,
-} from "./shared";
+import type { Quotation, Prescription } from "@/store/auth";
+import { PageHeader, KPI, Card, StatusPill } from "./shared";
 import {
   FileText,
   CheckCircle2,
@@ -26,11 +21,62 @@ import {
   Truck,
   Store,
   Bell,
+  User,
 } from "lucide-react";
 
+// ============================================================
+// MAIN DASHBOARD
+// ============================================================
 export function PharmacistDashboard({ view }: { view?: string }) {
-  const [items, setItems] = useState<StaffRxQueueItem[]>(STAFF_RX_QUEUE);
-  const [active, setActive] = useState<StaffRxQueueItem | null>(null);
+  const authPrescriptions = useAuth((s) => s.prescriptions);
+  const updatePrescriptionStatus = useAuth(
+    (s) => s.updatePrescriptionStatus
+  );
+
+  // Convert customer-uploaded prescriptions into queue format
+  const customerRxItems: StaffRxQueueItem[] =
+    authPrescriptions
+      .filter(
+        (p) =>
+          p.status === "Pending" ||
+          p.status === "Under Review" ||
+          p.status === "Approved — Awaiting Payment"
+      )
+      .map((p) => ({
+        id: p.id,
+        patient: p.patientName,
+        doctor: p.doctorName,
+        medication:
+          p.notes && p.notes.trim().length > 0
+            ? p.notes
+            : "See uploaded script",
+        dosage: "See uploaded script",
+        uploadedAt: p.uploadedAt,
+        priority: "Routine" as const,
+        status:
+          p.status === "Approved — Awaiting Payment"
+            ? ("Approved" as const)
+            : ("Pending" as const),
+        customerPhone: "",
+        customerEmail: "",
+        isRepeat: p.isRepeat,
+        repeatsLeft: p.repeatsLeft,
+        isCustomerRx: true,
+        authId: p.id,
+      }));
+
+  const [demoItems, setDemoItems] =
+    useState<StaffRxQueueItem[]>(STAFF_RX_QUEUE);
+  const [active, setActive] =
+    useState<StaffRxQueueItem | null>(null);
+
+  // Customer Rx items appear at the top
+  const allItems = [
+    ...customerRxItems,
+    ...demoItems.filter(
+      (i) => !customerRxItems.find((c) => c.id === i.id)
+    ),
+  ];
 
   const filter =
     view === "approved"
@@ -39,38 +85,74 @@ export function PharmacistDashboard({ view }: { view?: string }) {
       ? "Dispensed"
       : "Pending";
 
-  const visible = items.filter((i) => i.status === filter);
+  const visible = allItems.filter((i) => i.status === filter);
 
   const counts = useMemo(
     () => ({
-      pending: items.filter((i) => i.status === "Pending").length,
-      urgent: items.filter(
+      pending: allItems.filter((i) => i.status === "Pending")
+        .length,
+      urgent: allItems.filter(
         (i) =>
           i.status === "Pending" &&
           (i.priority === "Urgent" || i.priority === "Stat")
       ).length,
-      approvedToday: items.filter((i) => i.status === "Approved").length,
-      dispensedToday: items.filter((i) => i.status === "Dispensed").length,
+      approvedToday: allItems.filter(
+        (i) => i.status === "Approved"
+      ).length,
+      dispensedToday: allItems.filter(
+        (i) => i.status === "Dispensed"
+      ).length,
     }),
-    [items]
+    [allItems]
   );
 
   const setStatus = (
     id: string,
     status: StaffRxQueueItem["status"]
   ) => {
-    setItems((prev) =>
+    // Update demo queue
+    setDemoItems((prev) =>
       prev.map((i) => (i.id === id ? { ...i, status } : i))
     );
+
+    // Update real customer prescription in auth store
+    const customerItem = customerRxItems.find(
+      (c) => c.id === id
+    );
+    if (customerItem) {
+      const authStatus =
+        status === "Approved"
+          ? ("Approved — Awaiting Payment" as const)
+          : status === "Rejected"
+          ? ("Rejected" as const)
+          : status === "Dispensed"
+          ? ("Dispensed" as const)
+          : ("Pending" as const);
+      updatePrescriptionStatus(id, authStatus);
+    }
+
     setActive(null);
-    const labels = {
-      Approved: "approved and quotation sent to patient",
+
+    const labels: Record<string, string> = {
+      Approved: "approved — quotation sent to patient",
       Rejected: "rejected — patient notified",
       Dispensed: "marked as dispensed",
       Pending: "returned to queue",
     };
-    toast.success("Prescription " + (labels[status] ?? status));
+    toast.success(
+      "Prescription " + (labels[status] ?? status)
+    );
   };
+
+  // Find the matching auth prescription for the active item
+  const activeAuthPrescription: Prescription | null =
+    active
+      ? (authPrescriptions.find(
+          (p) =>
+            p.id === active.id ||
+            p.patientName === active.patient
+        ) ?? null)
+      : null;
 
   return (
     <div>
@@ -109,7 +191,14 @@ export function PharmacistDashboard({ view }: { view?: string }) {
       </div>
 
       <div className="mt-6">
-        <Card title={filter + " prescriptions (" + visible.length + ")"}>
+        <Card
+          title={
+            filter +
+            " prescriptions (" +
+            visible.length +
+            ")"
+          }
+        >
           {visible.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
               No prescriptions here.
@@ -121,15 +210,34 @@ export function PharmacistDashboard({ view }: { view?: string }) {
                   key={rx.id}
                   className="flex flex-wrap items-center gap-3 py-3"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <FileText className="h-5 w-5" />
+                  {/* Icon — green badge for real customer Rx */}
+                  <div
+                    className={
+                      "flex h-10 w-10 shrink-0 items-center " +
+                      "justify-center rounded-lg " +
+                      (rx.isCustomerRx
+                        ? "bg-green-100 text-green-700"
+                        : "bg-primary/10 text-primary")
+                    }
+                  >
+                    {rx.isCustomerRx ? (
+                      <User className="h-5 w-5" />
+                    ) : (
+                      <FileText className="h-5 w-5" />
+                    )}
                   </div>
+
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-bold text-foreground">
                         {rx.medication}
                       </span>
                       <StatusPill status={rx.priority} />
+                      {rx.isCustomerRx && (
+                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
+                          Customer Upload
+                        </span>
+                      )}
                       {rx.isRepeat && (
                         <span className="rounded bg-violet-50 px-1.5 py-0.5 text-[10px] font-bold text-violet-700">
                           Repeat × {rx.repeatsLeft}
@@ -141,6 +249,7 @@ export function PharmacistDashboard({ view }: { view?: string }) {
                       {rx.uploadedAt}
                     </div>
                   </div>
+
                   <button
                     onClick={() => setActive(rx)}
                     className="rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:bg-primary-dark"
@@ -159,28 +268,37 @@ export function PharmacistDashboard({ view }: { view?: string }) {
           rx={active}
           onClose={() => setActive(null)}
           onAction={setStatus}
+          authPrescription={activeAuthPrescription}
         />
       )}
     </div>
   );
 }
 
+// ============================================================
+// REVIEW MODAL
+// ============================================================
 function RxReviewModal({
   rx,
   onClose,
   onAction,
+  authPrescription,
 }: {
   rx: StaffRxQueueItem;
   onClose: () => void;
-  onAction: (id: string, status: StaffRxQueueItem["status"]) => void;
+  onAction: (
+    id: string,
+    status: StaffRxQueueItem["status"]
+  ) => void;
+  authPrescription: Prescription | null;
 }) {
   const updatePrescriptionStatus = useAuth(
     (s) => s.updatePrescriptionStatus
   );
-  const prescriptions = useAuth((s) => s.prescriptions);
 
   const [notes, setNotes] = useState(rx.notes ?? "");
-  const [showQuotationForm, setShowQuotationForm] = useState(false);
+  const [showQuotationForm, setShowQuotationForm] =
+    useState(false);
   const [quotation, setQuotation] = useState({
     medicationCost: "",
     deliveryFee: "15.00",
@@ -190,15 +308,19 @@ function RxReviewModal({
     notes: "",
   });
 
-  const matchedPrescription = prescriptions.find(
-    (p) =>
-      p.patientName === rx.patient ||
-      p.id === rx.id
-  );
+  // Use auth prescription for delivery info if available
+  const deliveryMode =
+    authPrescription?.delivery ?? "delivery";
+  const deliveryAddress =
+    authPrescription?.deliveryAddress ?? null;
+  const collectionBranchId =
+    authPrescription?.collectionBranchId ?? null;
 
-  const deliveryMode = matchedPrescription?.delivery ?? "delivery";
-  const deliveryAddress = matchedPrescription?.deliveryAddress;
-  const collectionBranchId = matchedPrescription?.collectionBranchId;
+  const totalAmount =
+    parseFloat(quotation.medicationCost || "0") +
+    (deliveryMode === "delivery"
+      ? parseFloat(quotation.deliveryFee || "0")
+      : 0);
 
   const handleApproveWithQuotation = () => {
     const medCost = parseFloat(quotation.medicationCost);
@@ -209,12 +331,13 @@ function RxReviewModal({
       return;
     }
 
-    const total = medCost + delFee;
+    const total =
+      deliveryMode === "collect" ? medCost : medCost + delFee;
 
     const q: Quotation = {
       medicationCost: medCost,
       deliveryFee: deliveryMode === "collect" ? 0 : delFee,
-      total: deliveryMode === "collect" ? medCost : total,
+      total,
       medicationName: quotation.medicationName,
       dosage: quotation.dosage,
       quantity: quotation.quantity,
@@ -228,19 +351,20 @@ function RxReviewModal({
       notes: quotation.notes || notes || undefined,
     };
 
-    if (matchedPrescription) {
-      updatePrescriptionStatus(
-        matchedPrescription.id,
-        "Approved — Awaiting Payment",
-        { quotation: q }
-      );
-    }
+    // Update the auth store prescription
+    const targetId = authPrescription?.id ?? rx.id;
+    updatePrescriptionStatus(
+      targetId,
+      "Approved — Awaiting Payment",
+      { quotation: q }
+    );
 
+    // Update the queue item status
     onAction(rx.id, "Approved");
 
     toast.success(
       "Prescription approved — quotation of $" +
-        (deliveryMode === "collect" ? medCost : total).toFixed(2) +
+        total.toFixed(2) +
         " sent to " +
         rx.patient
     );
@@ -259,6 +383,11 @@ function RxReviewModal({
               </h2>
               <StatusPill status={rx.status} />
               <StatusPill status={rx.priority} />
+              {rx.isCustomerRx && (
+                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
+                  Customer Upload
+                </span>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
               {rx.id} · uploaded {rx.uploadedAt}
@@ -277,6 +406,43 @@ function RxReviewModal({
 
           {/* LEFT — Script preview */}
           <div>
+            {/* If customer uploaded real files, show them */}
+            {authPrescription?.files &&
+              authPrescription.files.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2">
+                  Uploaded Files ({authPrescription.files.length})
+                </p>
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                  {authPrescription.files.map((f, i) => (
+                    <div
+                      key={i}
+                      className="aspect-square overflow-hidden rounded-lg border border-border bg-muted/20 flex items-center justify-center"
+                    >
+                      {f.dataUrl ? (
+                        <img
+                          src={f.dataUrl}
+                          alt={"Script " + (i + 1)}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-center p-2">
+                          <FileText className="h-8 w-8 mx-auto text-primary mb-1" />
+                          <p className="text-[10px] font-medium text-foreground truncate">
+                            {f.name}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {(f.size / 1024 / 1024).toFixed(1)} MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Prescription document */}
             <div className="rounded-lg border-2 border-dashed border-border bg-[#FAFAF7] p-4">
               <div className="rounded bg-white p-6 shadow ring-1 ring-border">
                 <div className="border-b pb-3 text-center">
@@ -284,7 +450,8 @@ function RxReviewModal({
                     {rx.doctor}
                   </div>
                   <div className="text-[10px] text-muted-foreground">
-                    MBChB · Suite 12, Avondale Medical Centre · Harare
+                    MBChB · Suite 12, Avondale Medical Centre ·
+                    Harare
                   </div>
                   <div className="text-[10px] text-muted-foreground">
                     MCZ Reg: MCZ-GP-004521
@@ -307,10 +474,17 @@ function RxReviewModal({
                   <div className="mt-2 text-sm font-bold">
                     {rx.medication}
                   </div>
-                  <div className="text-sm">Sig: {rx.dosage}</div>
+                  <div className="text-sm">
+                    Sig: {rx.dosage}
+                  </div>
                   {rx.isRepeat && (
                     <div className="mt-2 text-xs italic">
                       Repeat × {rx.repeatsLeft} remaining
+                    </div>
+                  )}
+                  {authPrescription?.scriptDate && (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Script date: {authPrescription.scriptDate}
                     </div>
                   )}
                 </div>
@@ -330,8 +504,8 @@ function RxReviewModal({
               </button>
             </div>
 
-            {/* Delivery info */}
-            {matchedPrescription && (
+            {/* Delivery info from customer */}
+            {(deliveryAddress || collectionBranchId) && (
               <div
                 className="mt-4 rounded-lg p-3 text-sm"
                 style={{
@@ -351,7 +525,8 @@ function RxReviewModal({
                       : "Collection In-Store"}
                   </span>
                 </div>
-                {deliveryMode === "delivery" && deliveryAddress ? (
+                {deliveryMode === "delivery" &&
+                deliveryAddress ? (
                   <div className="text-xs text-[#374151] space-y-0.5">
                     <p className="font-medium">
                       {deliveryAddress.firstName}{" "}
@@ -365,7 +540,8 @@ function RxReviewModal({
                     <p>{deliveryAddress.phone}</p>
                     {deliveryAddress.specialInstructions && (
                       <p className="italic text-[#6B7280]">
-                        Note: {deliveryAddress.specialInstructions}
+                        Note:{" "}
+                        {deliveryAddress.specialInstructions}
                       </p>
                     )}
                   </div>
@@ -373,10 +549,37 @@ function RxReviewModal({
                   <p className="text-xs text-[#374151]">
                     Patient will collect from branch
                     {collectionBranchId
-                      ? ": " + collectionBranchId.replace("_", " ")
+                      ? ": " +
+                        collectionBranchId
+                          .replace(/_/g, " ")
+                          .replace(/\b\w/g, (c) =>
+                            c.toUpperCase()
+                          )
                       : ""}
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* No delivery info for demo scripts */}
+            {!authPrescription &&
+              !deliveryAddress &&
+              !collectionBranchId && (
+              <div
+                className="mt-4 rounded-lg p-3 text-xs"
+                style={{
+                  background: "#F9FAFB",
+                  border: "1px solid #E5E7EB",
+                }}
+              >
+                <p className="text-muted-foreground">
+                  Delivery details not available for this script.
+                  Contact patient on{" "}
+                  <span className="font-semibold">
+                    {rx.customerPhone}
+                  </span>{" "}
+                  to confirm.
+                </p>
               </div>
             )}
 
@@ -403,19 +606,32 @@ function RxReviewModal({
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Patient
               </div>
-              <div className="mt-1 text-sm font-bold">{rx.patient}</div>
+              <div className="mt-1 text-sm font-bold">
+                {rx.patient}
+              </div>
               <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <Phone className="h-3 w-3" /> {rx.customerPhone}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Mail className="h-3 w-3" /> {rx.customerEmail}
-                </div>
+                {rx.customerPhone && (
+                  <div className="flex items-center gap-1.5">
+                    <Phone className="h-3 w-3" />{" "}
+                    {rx.customerPhone}
+                  </div>
+                )}
+                {rx.customerEmail && (
+                  <div className="flex items-center gap-1.5">
+                    <Mail className="h-3 w-3" />{" "}
+                    {rx.customerEmail}
+                  </div>
+                )}
                 {rx.medicalAid && (
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck className="h-3 w-3" />{" "}
                     {rx.medicalAid}
                   </div>
+                )}
+                {!rx.customerPhone && !rx.customerEmail && (
+                  <p className="italic text-[#9CA3AF]">
+                    Contact details from uploaded script
+                  </p>
                 )}
               </div>
             </div>
@@ -426,11 +642,12 @@ function RxReviewModal({
                 Prescriber
               </div>
               <div className="mt-1 flex items-center gap-1.5 text-sm font-bold">
-                <Stethoscope className="h-3.5 w-3.5" /> {rx.doctor}
+                <Stethoscope className="h-3.5 w-3.5" />{" "}
+                {rx.doctor}
               </div>
             </div>
 
-            {/* PENDING — show approve/reject */}
+            {/* PENDING — approve or reject */}
             {rx.status === "Pending" && !showQuotationForm && (
               <div className="space-y-2">
                 <button
@@ -444,7 +661,8 @@ function RxReviewModal({
                   onClick={() => onAction(rx.id, "Rejected")}
                   className="flex w-full items-center justify-center gap-2 rounded-md border border-destructive py-3 text-sm font-bold text-destructive hover:bg-destructive/10"
                 >
-                  <X className="h-4 w-4" /> Reject — Notify Patient
+                  <X className="h-4 w-4" /> Reject — Notify
+                  Patient
                 </button>
               </div>
             )}
@@ -465,11 +683,11 @@ function RxReviewModal({
                   </p>
                 </div>
                 <p className="text-xs text-[#6B7280]">
-                  Enter the medication cost. This will be sent to the
-                  patient to complete payment before dispensing.
+                  Enter the medication cost. The patient will
+                  receive a payment notification with this amount.
                 </p>
 
-                {/* Medication name */}
+                {/* Medication */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wide text-[#374151] mb-1">
                     Medication
@@ -532,7 +750,7 @@ function RxReviewModal({
                   </div>
                 </div>
 
-                {/* Delivery fee — only for home delivery */}
+                {/* Delivery fee */}
                 {deliveryMode === "delivery" && (
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wide text-[#374151] mb-1">
@@ -575,18 +793,12 @@ function RxReviewModal({
                       className="text-lg font-bold"
                       style={{ color: "#00853F" }}
                     >
-                      $
-                      {(
-                        parseFloat(quotation.medicationCost || "0") +
-                        (deliveryMode === "delivery"
-                          ? parseFloat(quotation.deliveryFee || "0")
-                          : 0)
-                      ).toFixed(2)}
+                      ${totalAmount.toFixed(2)}
                     </span>
                   </div>
                 )}
 
-                {/* Extra notes */}
+                {/* Patient instructions */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wide text-[#374151] mb-1">
                     Instructions for Patient (optional)
@@ -594,7 +806,10 @@ function RxReviewModal({
                   <textarea
                     value={quotation.notes}
                     onChange={(e) =>
-                      setQuotation({ ...quotation, notes: e.target.value })
+                      setQuotation({
+                        ...quotation,
+                        notes: e.target.value,
+                      })
                     }
                     rows={2}
                     placeholder="Take with food, avoid alcohol, etc."
@@ -615,19 +830,12 @@ function RxReviewModal({
                   </p>
                   <p className="text-[#374151]">
                     "Your prescription has been approved by Dr.
-                    Rumbidzai Ncube. Your medication is ready.
-                    Total amount due: $
-                    {(
-                      parseFloat(quotation.medicationCost || "0") +
-                      (deliveryMode === "delivery"
-                        ? parseFloat(quotation.deliveryFee || "0")
-                        : 0)
-                    ).toFixed(2)}
-                    . Tap to pay and confirm your order."
+                    Rumbidzai Ncube. Total amount due: $
+                    {totalAmount.toFixed(2)}. Tap to pay and
+                    confirm your order."
                   </p>
                 </div>
 
-                {/* Action buttons */}
                 <button
                   onClick={handleApproveWithQuotation}
                   className="flex w-full items-center justify-center gap-2 rounded-md bg-primary py-3 text-sm font-bold text-primary-foreground hover:bg-primary-dark"
@@ -644,7 +852,7 @@ function RxReviewModal({
               </div>
             )}
 
-            {/* APPROVED — show dispense button */}
+            {/* APPROVED — awaiting payment */}
             {rx.status === "Approved" && (
               <div className="space-y-2">
                 <div
@@ -658,27 +866,30 @@ function RxReviewModal({
                     Awaiting patient payment
                   </p>
                   <p className="text-[#374151] mt-0.5">
-                    Quotation sent to patient. Once paid, mark as
-                    dispensed and notify the dispatcher.
+                    Quotation sent to patient. Once paid, mark
+                    as dispensed to notify the dispatcher.
                   </p>
                 </div>
                 <button
-                  onClick={() => onAction(rx.id, "Dispensed")}
+                  onClick={() =>
+                    onAction(rx.id, "Dispensed")
+                  }
                   className="flex w-full items-center justify-center gap-2 rounded-md bg-sky-600 py-3 text-sm font-bold text-white hover:bg-sky-700"
                 >
-                  <Pill className="h-4 w-4" /> Mark as Dispensed
+                  <Pill className="h-4 w-4" /> Mark as
+                  Dispensed
                 </button>
               </div>
             )}
 
-            {/* Audit log notice */}
+            {/* Audit log */}
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-800">
               <div className="flex items-center gap-1.5 font-bold">
                 <Calendar className="h-3 w-3" /> Audit log
               </div>
               <div className="mt-1">
-                Every action is logged to the ZPC-compliant audit
-                trail with timestamp and pharmacist ID.
+                Every action is logged to the ZPC-compliant
+                audit trail with timestamp and pharmacist ID.
               </div>
             </div>
           </aside>
