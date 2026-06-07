@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/store/auth";
 import { Logo } from "@/components/layout/Logo";
-import { ShieldCheck, Truck, Sparkles, Mail, Users, ChevronDown, ChevronUp, KeyRound, CheckCircle2, Loader2 } from "lucide-react";
+import { ShieldCheck, Truck, Sparkles, Mail, Users, ChevronDown, ChevronUp, KeyRound, CheckCircle2, Loader2, Home } from "lucide-react";
 import { DEMO_CUSTOMERS } from "@/data/demoAccounts";
 
 type Mode = "login" | "register" | "forgot";
@@ -85,6 +85,14 @@ function AuthPage() {
 
   return (
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-2 lg:py-14">
+      <div className="lg:col-span-2 flex justify-start">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:bg-muted"
+        >
+          <Home className="h-4 w-4" /> Home
+        </Link>
+      </div>
       <div className="relative hidden flex-col justify-center overflow-hidden rounded-md bg-primary p-10 text-primary-foreground shadow-sm lg:flex">
         <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
