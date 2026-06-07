@@ -5,7 +5,9 @@ import { useShop, formatUSD } from "@/store/shop";
 import { useAuth, type Order } from "@/store/auth";
 import { getProduct } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
-import { Package, Heart, MapPin, Settings, LayoutDashboard, FileText, Truck, LogOut, Phone, Syringe, Store } from "lucide-react";
+import { Package, Heart, MapPin, Settings, LayoutDashboard, FileText, Truck, LogOut, Phone, Syringe, Store, Receipt as ReceiptIcon } from "lucide-react";
+import { ReceiptModal } from "@/components/receipt/ReceiptModal";
+import { buildReceipt, type Receipt } from "@/lib/receipts";
 
 export const Route = createFileRoute("/account")({
   head: () => ({ meta: [{ title: "My Account — Plus2 Pharmacy" }] }),
@@ -20,6 +22,23 @@ function AccountPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<"dash" | "orders" | "scripts" | "wishlist" | "card" | "address" | "settings">("dash");
   const wishlist = useShop((s) => s.wishlist).map(getProduct).filter(Boolean);
+  const [activeReceipt, setActiveReceipt] = useState<Receipt | null>(null);
+
+  const openReceiptFor = (orderId: string) => {
+    const o = orders.find((x) => x.id === orderId);
+    if (!o || !user) return;
+    const r = buildReceipt({
+      orderNumber: o.id,
+      items: o.items.map((it, i) => ({ name: it.name, sku: `SKU-${1000 + i}`, qty: it.qty, unitPrice: it.price, lineTotal: +(it.price * it.qty).toFixed(2) })),
+      customer: { name: `${user.firstName} ${user.lastName}`, email: user.email, phone: user.phone ?? "+263 78 200 0100", address: o.address },
+      paymentMethod: "USD Card",
+      cardLast4: "4242",
+      cardType: "Visa",
+      deliveryMethod: "Standard Delivery",
+      deliveryFee: 0,
+    });
+    setActiveReceipt(r);
+  };
 
   useEffect(() => {
     if (!user) navigate({ to: "/auth" });
@@ -120,7 +139,14 @@ function AccountPage() {
                       <td className="px-4 py-3 text-muted-foreground">{o.date}</td>
                       <td className="px-4 py-3"><StatusPill status={o.status} /></td>
                       <td className="px-4 py-3 font-bold">{formatUSD(o.total)}</td>
-                      <td className="px-4 py-3 text-right"><Link to="/track" search={{ order: o.id }} className="text-sm font-bold text-primary hover:underline">Track →</Link></td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => openReceiptFor(o.id)} title="View receipt" className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-bold text-foreground hover:border-primary hover:text-primary">
+                            <ReceiptIcon className="h-3.5 w-3.5" /> Receipt
+                          </button>
+                          <Link to="/track" search={{ order: o.id }} className="text-sm font-bold text-primary hover:underline">Track →</Link>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -177,6 +203,7 @@ function AccountPage() {
           )}
         </div>
       </div>
+      {activeReceipt && <ReceiptModal open={!!activeReceipt} receipt={activeReceipt} onClose={() => setActiveReceipt(null)} />}
     </div>
   );
 }
