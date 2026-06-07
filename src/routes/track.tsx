@@ -135,8 +135,8 @@ function OrderTracker({ order }: { order: Order }) {
               </div>
               <a href={`tel:${order.driver.phone}`} className="rounded-md bg-primary p-2 text-primary-foreground hover:bg-primary-dark" aria-label="Call driver"><Phone className="h-4 w-4" /></a>
             </div>
-            <div className="mt-4 flex h-32 items-center justify-center rounded-md bg-gradient-to-br from-primary/15 to-accent/15 text-xs font-semibold text-muted-foreground">
-              🗺️ Live map (demo)
+            <div className="mt-4 flex h-32 items-center justify-center rounded-md border border-border bg-surface text-xs font-semibold text-muted-foreground">
+              Live map (demo)
             </div>
           </div>
         )}
