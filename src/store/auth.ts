@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { findDemoCustomer } from "@/data/demoAccounts";
 
 export type User = {
   id: string;
@@ -132,6 +133,11 @@ export const useAuth = create<AuthState>()(
         await new Promise((r) => setTimeout(r, 500));
         if (!email || !password) return { ok: false, error: "Email and password are required" };
         if (password.length < 6) return { ok: false, error: "Invalid email or password" };
+        const demo = findDemoCustomer(email);
+        if (demo) {
+          set({ user: demo.user, orders: demo.orders, prescriptions: demo.prescriptions });
+          return { ok: true };
+        }
         const user: User = email.toLowerCase() === DEMO_USER.email
           ? DEMO_USER
           : { ...DEMO_USER, id: "u_" + Date.now(), email, firstName: email.split("@")[0] };
