@@ -87,7 +87,7 @@ const DEMO_ORDERS: Order[] = [
       { label: "Out for delivery", at: "07 Jun, 11:15", done: true },
       { label: "Delivered", at: "Est. today, 15:00", done: false },
     ],
-    driver: { name: "Sipho M.", phone: "+27 82 555 0119", vehicle: "Toyota Hilux · CA 482-991" },
+    driver: { name: "Sipho M.", phone: "+263 78 555 0119", vehicle: "Toyota Hilux · ACJ 4821" },
   },
   {
     id: "P2-182117",
