@@ -19,6 +19,13 @@ export type Prescription = {
   notes?: string;
   status: "Pending" | "Approved" | "Dispensed" | "Rejected";
   uploadedAt: string;
+  files?: { name: string; size: number; type: string; dataUrl?: string }[];
+  forSelf?: boolean;
+  relationship?: string;
+  scriptDate?: string;
+  isRepeat?: boolean;
+  repeatsLeft?: number;
+  delivery?: "delivery" | "collect";
 };
 
 export type TrackingEvent = { label: string; at: string; done: boolean };
