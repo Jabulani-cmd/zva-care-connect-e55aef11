@@ -577,4 +577,580 @@ function Step2Patient(props: {
   const {
     forSelf, setForSelf, patient, setPatient,
     relationship, setRelationship, doctor, setDoctor,
-    scriptDate, setScriptDate, isRepeat, se
+    scriptDate, setScriptDate, isRepeat, setIsRepeat,
+    repeatsLeft, setRepeatsLeft, notes, setNotes,
+  } = props;
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-lg font-bold text-[#111827]">
+          Patient Details
+        </h2>
+        <p className="text-sm text-[#6B7280]">
+          Tell us who this prescription is for.
+        </p>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[#374151]">
+          Who is this prescription for?
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <ToggleBtn active={forSelf} onClick={() => setForSelf(true)}>
+            Myself
+          </ToggleBtn>
+          <ToggleBtn
+            active={!forSelf}
+            onClick={() => setForSelf(false)}
+          >
+            Someone else
+          </ToggleBtn>
+        </div>
+      </div>
+
+      {!forSelf && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            label="Patient full name"
+            value={patient}
+            onChange={(e) => setPatient(e.target.value)}
+            required
+          />
+          <SelectField
+            label="Relationship"
+            value={relationship}
+            onChange={(e) => setRelationship(e.target.value)}
+            options={["Spouse", "Child", "Parent", "Sibling", "Other"]}
+          />
+        </div>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field
+          label="Doctor / Prescriber name (optional)"
+          value={doctor}
+          onChange={(e) => setDoctor(e.target.value)}
+        />
+        <Field
+          label="Date on prescription"
+          type="date"
+          value={scriptDate}
+          onChange={(e) => setScriptDate(e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[#374151]">
+          Is this a repeat prescription?
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <ToggleBtn
+            active={!isRepeat}
+            onClick={() => setIsRepeat(false)}
+          >
+            No
+          </ToggleBtn>
+          <ToggleBtn
+            active={isRepeat}
+            onClick={() => setIsRepeat(true)}
+          >
+            Yes
+          </ToggleBtn>
+        </div>
+        {isRepeat && (
+          <div className="mt-3">
+            <Field
+              label="How many repeats remaining?"
+              type="number"
+              min={1}
+              max={12}
+              value={repeatsLeft}
+              onChange={(e) =>
+                setRepeatsLeft(Number(e.target.value) || 1)
+              }
+            />
+          </div>
+        )}
+      </div>
+
+      <label className="block">
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[#374151]">
+          Notes to pharmacist
+        </span>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
+          maxLength={300}
+          placeholder="Any specific instructions, preferred generic brands, or questions for the pharmacist..."
+          className="w-full rounded-md border border-[#D1D5DB] bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+        />
+        <span className="mt-1 block text-right text-[10px] text-[#9CA3AF]">
+          {notes.length}/300
+        </span>
+      </label>
+    </div>
+  );
+}
+
+function ToggleBtn({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-md border px-4 py-3 text-sm font-semibold transition ${
+        active
+          ? "border-primary bg-[#F0F9F4] text-primary"
+          : "border-[#E5E7EB] bg-white text-[#374151] hover:bg-[#F9FAFB]"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Field({
+  label,
+  ...rest
+}: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[#374151]">
+        {label}
+      </span>
+      <input
+        {...rest}
+        className="w-full rounded-md border border-[#D1D5DB] bg-white px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+      />
+    </label>
+  );
+}
+
+function SelectField({
+  label,
+  options,
+  ...rest
+}: {
+  label: string;
+  options: string[];
+} & React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[#374151]">
+        {label}
+      </span>
+      <select
+        {...rest}
+        className="w-full rounded-md border border-[#D1D5DB] bg-white px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+      >
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+// ---------- Step 3: Delivery ----------
+function Step3Delivery({
+  delivery,
+  setDelivery,
+}: {
+  delivery: "delivery" | "collect";
+  setDelivery: (v: "delivery" | "collect") => void;
+}) {
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-lg font-bold text-[#111827]">
+          Delivery Method
+        </h2>
+        <p className="text-sm text-[#6B7280]">
+          Choose how you'd like to receive your medication once
+          dispensed.
+        </p>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <DeliveryOption
+          active={delivery === "delivery"}
+          onClick={() => setDelivery("delivery")}
+          icon={Truck}
+          title="Home Delivery"
+          subtitle="Delivered to your door within 24 hours · Free over $50"
+        />
+        <DeliveryOption
+          active={delivery === "collect"}
+          onClick={() => setDelivery("collect")}
+          icon={Store}
+          title="Collect in-store"
+          subtitle="Ready for collection at your nearest Plus2 branch"
+        />
+      </div>
+    </div>
+  );
+}
+
+function DeliveryOption({
+  active,
+  onClick,
+  icon: Icon,
+  title,
+  subtitle,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: typeof Truck;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex items-start gap-3 rounded-lg border p-4 text-left transition ${
+        active
+          ? "border-primary bg-[#F0F9F4]"
+          : "border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]"
+      }`}
+    >
+      <span
+        className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+          active ? "bg-primary text-white" : "bg-[#F0F9F4] text-primary"
+        }`}
+      >
+        <Icon className="h-5 w-5" />
+      </span>
+      <span>
+        <span className="block text-sm font-semibold text-[#111827]">
+          {title}
+        </span>
+        <span className="block text-xs text-[#6B7280]">{subtitle}</span>
+      </span>
+    </button>
+  );
+}
+
+// ---------- Step 4: Review ----------
+function Step4Review(props: {
+  files: LocalFile[];
+  forSelf: boolean;
+  patient: string;
+  relationship: string;
+  doctor: string;
+  scriptDate: string;
+  isRepeat: boolean;
+  repeatsLeft: number;
+  delivery: "delivery" | "collect";
+  confirm: boolean;
+  setConfirm: (v: boolean) => void;
+}) {
+  const {
+    files, forSelf, patient, relationship, doctor,
+    scriptDate, isRepeat, repeatsLeft, delivery,
+    confirm, setConfirm,
+  } = props;
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-lg font-bold text-[#111827]">
+          Review & Submit
+        </h2>
+        <p className="text-sm text-[#6B7280]">
+          Confirm the details below before submitting to our
+          pharmacist.
+        </p>
+      </div>
+
+      <Section title="Scripts">
+        <div className="flex flex-wrap gap-2">
+          {files.map((f) => (
+            <div
+              key={f.id}
+              className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-md border border-[#E5E7EB] bg-[#F9FAFB]"
+            >
+              {f.preview ? (
+                <img
+                  src={f.preview}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <FileText className="h-6 w-6 text-primary" />
+              )}
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Patient">
+        <DL
+          items={[
+            [
+              "For",
+              forSelf
+                ? "Myself"
+                : `${patient}${relationship ? ` (${relationship})` : ""}`,
+            ],
+            ["Doctor", doctor || "—"],
+            ["Date on script", scriptDate],
+            [
+              "Repeat",
+              isRepeat ? `Yes (${repeatsLeft} remaining)` : "No",
+            ],
+          ]}
+        />
+      </Section>
+
+      <Section title="Delivery">
+        <p className="text-sm text-[#374151]">
+          {delivery === "delivery"
+            ? "Home Delivery (to your default address) · $15.00"
+            : "Collect from your nearest Plus2 branch · $10.00"}
+        </p>
+      </Section>
+
+      <Section title="Payment">
+        <p className="text-sm text-[#374151]">
+          Payment will be collected after submission via EcoCash,
+          OneMoney, TeleCash, ZimSwitch or Bank Transfer.
+        </p>
+      </Section>
+
+      <div className="flex items-start gap-2 rounded-md border border-[#FDE68A] bg-[#FEF3C7] p-3 text-xs text-[#854D0E]">
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+        <span>
+          Important: Ensure your prescription is valid, dated, and
+          signed by a registered healthcare professional. Submitting
+          a forged script is a criminal offence under Zimbabwean law.
+        </span>
+      </div>
+
+      <label className="flex cursor-pointer items-start gap-2 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-3 text-sm">
+        <input
+          type="checkbox"
+          checked={confirm}
+          onChange={(e) => setConfirm(e.target.checked)}
+          className="mt-0.5 h-4 w-4 accent-[#00853F]"
+        />
+        <span className="text-[#374151]">
+          I confirm this is a genuine, valid prescription issued by
+          a registered healthcare professional.
+        </span>
+      </label>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-md border border-[#E5E7EB] bg-white p-4">
+      <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#6B7280]">
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function DL({ items }: { items: [string, string][] }) {
+  return (
+    <dl className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-2">
+      {items.map(([k, v]) => (
+        <div key={k} className="flex gap-2">
+          <dt className="text-[#6B7280]">{k}:</dt>
+          <dd className="font-medium text-[#111827]">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+// ---------- Step 5: Success ----------
+function Step5Success({
+  refId,
+  paymentRef,
+  paymentMethod,
+}: {
+  refId: string;
+  paymentRef: string | null;
+  paymentMethod: string | null;
+}) {
+  const stages = [
+    "Submitted",
+    "Under Review",
+    "Approved",
+    "Being Prepared",
+    "Out for Delivery",
+    "Delivered",
+  ];
+
+  return (
+    <div className="space-y-6 text-center">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#F0F9F4]">
+        <CheckCircle2 className="h-12 w-12 text-primary" />
+      </div>
+
+      <div>
+        <h2 className="text-xl font-bold text-[#111827]">
+          Prescription Submitted & Payment Confirmed
+        </h2>
+        <p className="mt-1 text-sm text-[#6B7280]">
+          Reference:{" "}
+          <span className="font-mono font-semibold text-[#111827]">
+            {refId}
+          </span>
+        </p>
+      </div>
+
+      {paymentRef && (
+        <div
+          className="mx-auto max-w-sm rounded-lg p-4 text-left"
+          style={{
+            background: "#F0F9F4",
+            border: "1px solid #BBF7D0",
+          }}
+        >
+          <p
+            className="mb-2 text-[11px] font-semibold uppercase tracking-wide"
+            style={{ color: "#00853F" }}
+          >
+            Payment Details
+          </p>
+          {[
+            ["Payment Reference", paymentRef],
+            ["Method", paymentMethod ?? "—"],
+            ["Status", "Confirmed"],
+          ].map(([label, value]) => (
+            <div
+              key={label}
+              className="flex justify-between border-b border-gray-100 py-1.5 last:border-0"
+            >
+              <span className="text-xs text-[#6B7280]">{label}</span>
+              <span className="text-xs font-semibold text-[#111827]">
+                {value}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p className="mx-auto max-w-md text-sm text-[#374151]">
+        Payment confirmed. Our pharmacist will review your script
+        within 2 hours during operating hours (Mon–Sat 8am–6pm).
+      </p>
+
+      <div className="overflow-x-auto">
+        <ol className="mx-auto flex min-w-[600px] items-center gap-1 px-4">
+          {stages.map((s, i) => (
+            <li key={s} className="flex flex-1 items-center gap-1">
+              <div
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                  i === 0
+                    ? "bg-primary text-white"
+                    : "bg-[#E5E7EB] text-[#6B7280]"
+                }`}
+              >
+                {i + 1}
+              </div>
+              <span
+                className={`text-[10px] font-medium ${
+                  i === 0 ? "text-primary" : "text-[#9CA3AF]"
+                }`}
+              >
+                {s}
+              </span>
+              {i < stages.length - 1 && (
+                <div
+                  className={`h-px flex-1 ${
+                    i === 0 ? "bg-primary" : "bg-[#E5E7EB]"
+                  }`}
+                />
+              )}
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <p className="text-xs text-[#6B7280]">
+        You'll receive SMS and email updates at each stage.
+      </p>
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+        <Link
+          to="/track"
+          className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-dark"
+        >
+          Track This Order
+        </Link>
+        <button
+          onClick={() => window.location.reload()}
+          className="rounded-md border border-primary px-6 py-3 text-sm font-semibold text-primary hover:bg-[#F0F9F4]"
+        >
+          Upload Another Script
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Recent Scripts ----------
+function RecentScripts({
+  list,
+}: {
+  list: {
+    id: string;
+    status: string;
+    fileName: string;
+    uploadedAt: string;
+  }[];
+}) {
+  return (
+    <div className="mt-8 rounded-lg border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="border-b border-[#E5E7EB] px-5 py-4">
+        <h2 className="text-base font-bold text-[#111827]">
+          Recent Scripts
+        </h2>
+      </div>
+      <ul className="divide-y divide-[#E5E7EB]">
+        {list.map((p) => (
+          <li
+            key={p.id}
+            className="flex items-center gap-3 px-5 py-3"
+          >
+            <FileText className="h-5 w-5 text-primary" />
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-[#111827]">
+                {p.id}
+              </div>
+              <div className="truncate text-xs text-[#6B7280]">
+                {p.fileName} · {p.uploadedAt}
+              </div>
+            </div>
+            <span className="rounded-full bg-[#F0F9F4] px-2 py-0.5 text-[11px] font-semibold text-primary">
+              {p.status}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
