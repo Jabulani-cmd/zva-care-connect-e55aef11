@@ -118,6 +118,14 @@ function ProductPage() {
         </div>
       </div>
 
+      {product.isPrescription && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E5E7EB] bg-white p-3 shadow-lg md:hidden">
+          <Link to="/prescriptions" className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-dark">
+            <FileText className="h-4 w-4" /> Upload Script for This Item
+          </Link>
+        </div>
+      )}
+
       {related.length > 0 && (
         <section className="mt-12">
           <h2 className="mb-4 text-xl font-extrabold">Customers Also Viewed</h2>

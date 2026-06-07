@@ -19,6 +19,13 @@ export type Prescription = {
   notes?: string;
   status: "Pending" | "Approved" | "Dispensed" | "Rejected";
   uploadedAt: string;
+  files?: { name: string; size: number; type: string; dataUrl?: string }[];
+  forSelf?: boolean;
+  relationship?: string;
+  scriptDate?: string;
+  isRepeat?: boolean;
+  repeatsLeft?: number;
+  delivery?: "delivery" | "collect";
 };
 
 export type TrackingEvent = { label: string; at: string; done: boolean };
@@ -41,7 +48,7 @@ type AuthState = {
   register: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string }) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
   resetPassword: (email: string) => Promise<{ ok: boolean }>;
-  addPrescription: (p: Omit<Prescription, "id" | "status" | "uploadedAt">) => void;
+  addPrescription: (p: Omit<Prescription, "id" | "status" | "uploadedAt">) => string;
 };
 
 const DEMO_ORDERS: Order[] = [
@@ -146,17 +153,21 @@ export const useAuth = create<AuthState>()(
         return { ok: true };
       },
       addPrescription: (p) =>
+      {
+        const id = "RX-2025-" + Math.floor(100000 + Math.random() * 899999);
         set({
           prescriptions: [
             {
-              id: "RX-" + Math.floor(90000 + Math.random() * 9999),
+              id,
               status: "Pending",
               uploadedAt: new Date().toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" }),
               ...p,
             },
             ...get().prescriptions,
           ],
-        }),
+        });
+        return id;
+      },
     }),
     { name: "plus2-auth", partialize: (s) => ({ user: s.user, prescriptions: s.prescriptions }) }
   )
