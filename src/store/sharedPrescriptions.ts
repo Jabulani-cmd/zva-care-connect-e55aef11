@@ -3,9 +3,7 @@
 // src/store/sharedPrescriptions.ts
 //
 // This store bridges the customer portal and staff portal.
-// When a customer uploads a script it goes here.
-// When a pharmacist reviews it the status updates here.
-// Both portals read from and write to this same store.
+// Both portals read from and write to this same localStorage key.
 // ============================================================
 
 import { create } from "zustand";
@@ -77,7 +75,6 @@ export type SharedPrescription = {
   paymentMethod?: string;
   paidAt?: string;
   pharmacistNotes?: string;
-  pharmacistId?: string;
   approvedAt?: string;
   rejectionReason?: string;
   driverName?: string;
@@ -86,198 +83,170 @@ export type SharedPrescription = {
   dispatchedAt?: string;
 };
 
-type SharedPrescriptionsState = {
+type SharedState = {
   prescriptions: SharedPrescription[];
-
-  // Called by customer when uploading
-  addPrescription: (p: Omit<SharedPrescription, "status" | "uploadedAt">) => void;
-
-  // Called by pharmacist when approving with quotation
+  addPrescription: (
+    p: Omit<SharedPrescription, "status" | "uploadedAt">
+  ) => void;
   approvePrescription: (
     id: string,
     quotation: SharedQuotation,
     pharmacistNotes?: string
   ) => void;
-
-  // Called by pharmacist when rejecting
   rejectPrescription: (id: string, reason: string) => void;
-
-  // Called by pharmacist when marking dispensed
   dispensePrescription: (id: string) => void;
-
-  // Called by customer after paying
   markPaid: (
     id: string,
     paymentRef: string,
     paymentMethod: string
   ) => void;
-
-  // Called by dispatcher when assigning driver
   assignDriver: (
     id: string,
     driverName: string,
     driverPhone: string,
     driverVehicle: string
   ) => void;
-
-  // Generic status update
   updateStatus: (
     id: string,
     status: SharedPrescriptionStatus,
     extra?: Partial<SharedPrescription>
   ) => void;
-
-  // Get pending prescriptions for pharmacist
-  getPending: () => SharedPrescription[];
-
-  // Get prescriptions for a specific customer
-  getForCustomer: (customerId: string) => SharedPrescription[];
 };
 
-export const useSharedPrescriptions =
-  create<SharedPrescriptionsState>()(
-    persist(
-      (set, get) => ({
-        prescriptions: [],
+export const useSharedPrescriptions = create<SharedState>()(
+  persist(
+    (set) => ({
+      prescriptions: [],
 
-        addPrescription: (p) => {
-          const uploadedAt = new Date().toLocaleString("en-ZW", {
+      addPrescription: (p) => {
+        const uploadedAt = new Date().toLocaleString("en-ZW", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        set((state) => ({
+          prescriptions: [
+            { ...p, status: "Pending", uploadedAt },
+            ...state.prescriptions,
+          ],
+        }));
+      },
+
+      approvePrescription: (id, quotation, pharmacistNotes) => {
+        const approvedAt = new Date().toLocaleString("en-ZW", {
+          day: "2-digit",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        set((state) => ({
+          prescriptions: state.prescriptions.map((p) =>
+            p.id === id
+              ? {
+                  ...p,
+                  status:
+                    "Approved — Awaiting Payment" as SharedPrescriptionStatus,
+                  quotation,
+                  pharmacistNotes,
+                  approvedAt,
+                }
+              : p
+          ),
+        }));
+      },
+
+      rejectPrescription: (id, reason) => {
+        set((state) => ({
+          prescriptions: state.prescriptions.map((p) =>
+            p.id === id
+              ? {
+                  ...p,
+                  status: "Rejected" as SharedPrescriptionStatus,
+                  rejectionReason: reason,
+                }
+              : p
+          ),
+        }));
+      },
+
+      dispensePrescription: (id) => {
+        set((state) => ({
+          prescriptions: state.prescriptions.map((p) =>
+            p.id === id
+              ? {
+                  ...p,
+                  status: "Dispensing" as SharedPrescriptionStatus,
+                }
+              : p
+          ),
+        }));
+      },
+
+      markPaid: (id, paymentRef, paymentMethod) => {
+        const paidAt = new Date().toLocaleString("en-ZW", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        set((state) => ({
+          prescriptions: state.prescriptions.map((p) =>
+            p.id === id
+              ? {
+                  ...p,
+                  status: "Paid" as SharedPrescriptionStatus,
+                  paymentRef,
+                  paymentMethod,
+                  paidAt,
+                }
+              : p
+          ),
+        }));
+      },
+
+      assignDriver: (
+        id,
+        driverName,
+        driverPhone,
+        driverVehicle
+      ) => {
+        const dispatchedAt = new Date().toLocaleString(
+          "en-ZW",
+          {
             day: "2-digit",
             month: "short",
-            year: "numeric",
             hour: "2-digit",
             minute: "2-digit",
-          });
-          set((state) => ({
-            prescriptions: [
-              {
-                ...p,
-                status: "Pending",
-                uploadedAt,
-              },
-              ...state.prescriptions,
-            ],
-          }));
-        },
+          }
+        );
+        set((state) => ({
+          prescriptions: state.prescriptions.map((p) =>
+            p.id === id
+              ? {
+                  ...p,
+                  status:
+                    "Out for Delivery" as SharedPrescriptionStatus,
+                  driverName,
+                  driverPhone,
+                  driverVehicle,
+                  dispatchedAt,
+                }
+              : p
+          ),
+        }));
+      },
 
-        approvePrescription: (id, quotation, pharmacistNotes) => {
-          const approvedAt = new Date().toLocaleString("en-ZW", {
-            day: "2-digit",
-            month: "short",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-          set((state) => ({
-            prescriptions: state.prescriptions.map((p) =>
-              p.id === id
-                ? {
-                    ...p,
-                    status: "Approved — Awaiting Payment" as SharedPrescriptionStatus,
-                    quotation,
-                    pharmacistNotes,
-                    approvedAt,
-                  }
-                : p
-            ),
-          }));
-        },
-
-        rejectPrescription: (id, reason) => {
-          set((state) => ({
-            prescriptions: state.prescriptions.map((p) =>
-              p.id === id
-                ? {
-                    ...p,
-                    status: "Rejected" as SharedPrescriptionStatus,
-                    rejectionReason: reason,
-                  }
-                : p
-            ),
-          }));
-        },
-
-        dispensePrescription: (id) => {
-          set((state) => ({
-            prescriptions: state.prescriptions.map((p) =>
-              p.id === id
-                ? {
-                    ...p,
-                    status: "Dispensing" as SharedPrescriptionStatus,
-                  }
-                : p
-            ),
-          }));
-        },
-
-        markPaid: (id, paymentRef, paymentMethod) => {
-          const paidAt = new Date().toLocaleString("en-ZW", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-          set((state) => ({
-            prescriptions: state.prescriptions.map((p) =>
-              p.id === id
-                ? {
-                    ...p,
-                    status: "Paid" as SharedPrescriptionStatus,
-                    paymentRef,
-                    paymentMethod,
-                    paidAt,
-                  }
-                : p
-            ),
-          }));
-        },
-
-        assignDriver: (id, driverName, driverPhone, driverVehicle) => {
-          set((state) => ({
-            prescriptions: state.prescriptions.map((p) =>
-              p.id === id
-                ? {
-                    ...p,
-                    status: "Out for Delivery" as SharedPrescriptionStatus,
-                    driverName,
-                    driverPhone,
-                    driverVehicle,
-                    dispatchedAt: new Date().toLocaleString("en-ZW", {
-                      day: "2-digit",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }),
-                  }
-                : p
-            ),
-          }));
-        },
-
-        updateStatus: (id, status, extra = {}) => {
-          set((state) => ({
-            prescriptions: state.prescriptions.map((p) =>
-              p.id === id ? { ...p, status, ...extra } : p
-            ),
-          }));
-        },
-
-        getPending: () => {
-          return get().prescriptions.filter(
-            (p) =>
-              p.status === "Pending" ||
-              p.status === "Under Review"
-          );
-        },
-
-        getForCustomer: (customerId) => {
-          return get().prescriptions.filter(
-            (p) => p.customerId === customerId
-          );
-        },
-      }),
-      {
-        name: "plus2-shared-prescriptions",
-      }
-    )
-  );
+      updateStatus: (id, status, extra = {}) => {
+        set((state) => ({
+          prescriptions: state.prescriptions.map((p) =>
+            p.id === id ? { ...p, status, ...extra } : p
+          ),
+        }));
+      },
+    }),
+    { name: "plus2-shared-prescriptions" }
+  )
+);
