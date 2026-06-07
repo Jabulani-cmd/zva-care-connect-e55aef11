@@ -45,5 +45,14 @@ export const useShop = create<ShopState>()(
   )
 );
 
+// Zimbabwe pricing — USD is the most widely accepted currency.
+// ZIG (Zimbabwe Gold) equivalent is shown alongside where useful.
 export const formatZAR = (n: number) =>
-  "R" + n.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  "US$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+export const formatPrice = formatZAR;
+
+// 1 USD ≈ 26 ZIG (illustrative demo rate)
+export const ZIG_RATE = 26;
+export const formatZIG = (n: number) =>
+  "ZIG " + (n * ZIG_RATE).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
