@@ -87,14 +87,14 @@ function ProductPage() {
               <button onClick={() => setQty(qty + 1)} className="p-3 hover:bg-muted"><Plus className="h-4 w-4" /></button>
             </div>
             <button
-              onClick={() => { addToCart(product.id, qty); toast.success(`✅ Added ${qty} × ${product.brand}`); }}
+              onClick={() => { addToCart(product.id, qty); toast.success(`Added ${qty} × ${product.brand}`); }}
               className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary py-3 font-bold text-primary-foreground transition hover:bg-primary-dark"
             >
               <ShoppingCart className="h-4 w-4" /> Add to Cart
             </button>
           </div>
           <div className="mt-3 flex gap-3">
-            <button onClick={() => { toggleWishlist(product.id); toast.success(wished ? "Removed" : "❤️ Wishlisted"); }} className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-3 text-sm font-bold hover:bg-muted">
+            <button onClick={() => { toggleWishlist(product.id); toast.success(wished ? "Removed from wishlist" : "Added to wishlist"); }} className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-3 text-sm font-bold hover:bg-muted">
               <Heart className={`h-4 w-4 ${wished ? "fill-accent text-accent" : ""}`} /> Wishlist
             </button>
             <button className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-3 text-sm font-bold hover:bg-muted">
@@ -112,7 +112,7 @@ function ProductPage() {
               {tab === "desc" && <p>{product.longDesc}</p>}
               {tab === "ingredients" && <p>{product.ingredients}</p>}
               {tab === "use" && <p>{product.howToUse}</p>}
-              {tab === "reviews" && <p>★ {product.rating.toFixed(1)} from {product.reviewCount} verified customers. "Excellent product, fast delivery, will buy again!" — Verified buyer</p>}
+              {tab === "reviews" && <p>{product.rating.toFixed(1)} / 5 from {product.reviewCount} verified customers. "Excellent product, fast delivery, will buy again!" — Verified buyer</p>}
             </div>
           </div>
         </div>

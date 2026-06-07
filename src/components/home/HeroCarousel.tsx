@@ -22,7 +22,7 @@ export function HeroCarousel() {
           className="relative h-[260px] w-full md:h-[480px]"
         >
           <img src={s.image} alt={s.headline} className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-black/55" />
           <div className="relative z-10 flex h-full max-w-7xl items-center px-6 md:px-12">
             <div className="max-w-xl text-white">
               <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#86EFAC]">{s.eyebrow}</p>

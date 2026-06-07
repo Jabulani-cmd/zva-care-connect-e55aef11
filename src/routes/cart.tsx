@@ -27,7 +27,7 @@ function CartPage() {
   const upsell = PRODUCTS.filter((p) => !cart.some((c) => c.id === p.id)).slice(0, 4);
 
   const applyCode = () => {
-    if (code.trim().toUpperCase() === "PLUS10") { setPromoCode("PLUS10"); toast.success("🎉 PLUS10 applied — 10% off!"); }
+    if (code.trim().toUpperCase() === "PLUS10") { setPromoCode("PLUS10"); toast.success("PLUS10 applied — 10% off"); }
     else { toast.error("Invalid promo code. Try PLUS10"); }
   };
 
@@ -55,7 +55,7 @@ function CartPage() {
               <div className="flex flex-1 flex-col">
                 <div className="text-[10px] font-bold uppercase text-muted-foreground">{i.product.brand}</div>
                 <Link to="/product/$id" params={{ id: i.id }} className="font-semibold hover:text-primary">{i.product.name}</Link>
-                <div className="mt-1 text-xs text-success">✓ In stock</div>
+                <div className="mt-1 text-xs text-success">In stock</div>
                 <div className="mt-auto flex items-end justify-between pt-2">
                   <div className="flex items-center gap-1 rounded-md border border-border">
                     <button onClick={() => updateQty(i.id, i.qty - 1)} className="p-1.5 hover:bg-muted"><Minus className="h-3 w-3" /></button>
@@ -78,7 +78,7 @@ function CartPage() {
             <div className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="font-semibold">{formatZAR(subtotal)}</span></div>
               {discount > 0 && <div className="flex justify-between text-success"><span>Discount (PLUS10)</span><span>− {formatZAR(discount)}</span></div>}
-              <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span className="font-semibold">{delivery === 0 ? "FREE 🎉" : formatZAR(delivery)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span className="font-semibold">{delivery === 0 ? "FREE" : formatZAR(delivery)}</span></div>
             </div>
             <div className="mt-4 flex gap-2">
               <div className="relative flex-1">
