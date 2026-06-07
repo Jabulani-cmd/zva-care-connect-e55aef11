@@ -30,7 +30,7 @@ function Checkout() {
   const orderNumber = "P2-" + Math.floor(100000 + Math.random() * 900000);
   const [cvvVisible, setCvvVisible] = useState(false);
   const [simOpen, setSimOpen] = useState(false);
-  const [authRef, setAuthRef] = useState<string | null>(null);
+  const [, setAuthRef] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
 
   if (items.length === 0 && step < 3) {
