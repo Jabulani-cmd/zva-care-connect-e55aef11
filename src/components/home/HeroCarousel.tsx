@@ -12,13 +12,13 @@ export function HeroCarousel() {
   const s = HERO_SLIDES[i];
   return (
     <div className="relative overflow-hidden rounded-2xl shadow-lg md:rounded-3xl">
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={i}
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 0.6 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
           className="flex min-h-[260px] items-center justify-between gap-4 p-6 text-white md:min-h-[360px] md:p-12"
           style={{ background: s.gradient }}
         >
