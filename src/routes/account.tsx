@@ -98,7 +98,6 @@ function PrescriptionTracker({
               ${rx.quotation.total.toFixed(2)}
             </div>
           )}
-          {/* Track button — navigates to /track page */}
           <button
             onClick={() => onTrack(rx.id)}
             className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-bold text-white transition hover:opacity-90"
@@ -189,7 +188,8 @@ function PrescriptionTracker({
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" style={{ color: isDelivered ? "#00853F" : "#7C3AED" }} />
                 <div>
-                  
+                  {/* ✅ Fixed: missing <a tag */}
+                  <a
                     href={"tel:" + rx.driverPhone}
                     className="text-sm font-semibold"
                     style={{ color: isDelivered ? "#00853F" : "#7C3AED" }}
@@ -207,7 +207,6 @@ function PrescriptionTracker({
               {isDelivered ? "Delivered" : "Dispatched"}: {rx.dispatchedAt}
             </p>
           )}
-          {/* Live track CTA */}
           {isOutForDelivery && (
             <button
               onClick={() => onTrack(rx.id)}
@@ -289,7 +288,6 @@ function AccountPage() {
     (p) => p.status === "Delivered"
   );
 
-  // Navigate to /track page with order ID pre-filled
   const handleTrackRx = (id: string) => {
     navigate({ to: "/track", search: { order: id } });
   };
@@ -338,7 +336,6 @@ function AccountPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-
       {/* Payment notification banners */}
       {pendingPayment.length > 0 && (
         <div className="mb-6 space-y-3">
