@@ -63,13 +63,13 @@ export default function PaymentModal({
   orderType,
   itemSummary,
 }: PaymentModalProps) {
-  const [selectedMethod, setSelectedMethod] = useState
+  const [selectedMethod, setSelectedMethod] = useState<
     string | null
   >(null);
-  const [formData, setFormData] = useState
+  const [formData, setFormData] = useState<
     Record<string, string>
   >({});
-  const [status, setStatus] = useState
+  const [status, setStatus] = useState<
     | "idle"
     | "processing"
     | "prompt_sent"
