@@ -234,7 +234,7 @@ function PrescriptionTracker({
                   style={{ color: isDelivered ? "#00853F" : "#7C3AED" }}
                 />
                 <div>
-                  
+                  <a
                     href={"tel:" + rx.driverPhone}
                     className="text-sm font-semibold"
                     style={{ color: isDelivered ? "#00853F" : "#7C3AED" }}
@@ -293,21 +293,23 @@ function AccountPage() {
   const prescriptions = useAuth((s) => s.prescriptions);
   const logout = useAuth((s) => s.logout);
   const navigate = useNavigate();
+
+  // ✅ Only one declaration – keep the one with line breaks (more readable)
   const sharedPrescriptions = useSharedPrescriptions(
     (s) => s.prescriptions
   );
   const markSharedPaid = useSharedPrescriptions((s) => s.markPaid);
+
+  // ✅ Only one wishlist declaration
   const wishlist = useShop((s) => s.wishlist)
     .map(getProduct)
     .filter(Boolean);
+
+  // ✅ Unique state declarations
   const [tab, setTab] = useState("dash");
-  const [activeReceipt, setActiveReceipt] = useState(
-    null as Receipt | null
-  );
-  const [payingRx, setPayingRx] = useState(
-    null as (typeof sharedPrescriptions)[0] | null
-  );
-  const [dismissedIds, setDismissedIds] = useState([] as string[]);
+  const [activeReceipt, setActiveReceipt] = useState<Receipt | null>(null);
+  const [payingRx, setPayingRx] = useState<(typeof sharedPrescriptions)[0] | null>(null);
+  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (!user) navigate({ to: "/auth" });
@@ -383,7 +385,6 @@ function AccountPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-
       {/* Payment notification banners */}
       {pendingPayment.length > 0 && (
         <div className="mb-6 space-y-3">
@@ -398,9 +399,7 @@ function AccountPage() {
               }}
             >
               <button
-                onClick={() =>
-                  setDismissedIds((prev) => [...prev, rx.id])
-                }
+                onClick={() => setDismissedIds((prev) => [...prev, rx.id])}
                 className="absolute right-3 top-3 rounded-full p-1 hover:bg-black/5"
                 aria-label="Dismiss"
               >
@@ -791,9 +790,7 @@ function AccountPage() {
 
           {tab === "scripts" && (
             <div className="space-y-4">
-              {/* Active prescription orders with tracking */}
-              {(activeRxOrders.length > 0 ||
-                deliveredRxOrders.length > 0) && (
+              {(activeRxOrders.length > 0 || deliveredRxOrders.length > 0) && (
                 <div>
                   <h3 className="mb-3 font-extrabold text-foreground">
                     Prescription Order Tracking
@@ -809,7 +806,6 @@ function AccountPage() {
                 </div>
               )}
 
-              {/* All prescriptions list */}
               <div className="rounded-xl border border-border bg-card p-5">
                 <div className="flex items-center justify-between">
                   <h3 className="font-extrabold">My Prescriptions</h3>
