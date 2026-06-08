@@ -316,7 +316,7 @@ function StaffLayout() {
   const navigate = useNavigate();
   const location = useRouterState({ select: (s) => s.location });
   const pathname = location.pathname;
-  const search = (location.search ?? {}) as unknown as Record
+  const search = (location.search ?? {}) as unknown as Record<
     string,
     string
   >;
