@@ -27,7 +27,7 @@ import {
 // ============================================================
 // MAIN DASHBOARD
 // ============================================================
-export function PharmacistDashboard() {
+export function PharmacistDashboard(_props: { view?: string } = {}) {
   const sharedPrescriptions = useSharedPrescriptions(
     (s) => s.prescriptions
   );

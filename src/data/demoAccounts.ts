@@ -62,7 +62,7 @@ export const DEMO_CUSTOMERS: DemoCustomer[] = [
       mkOrder({ id: "P2-002", date: "Today 11:30", total: 137.97, status: "Out for delivery", address: ADDR_THABO, items: [{ name: "USN Whey Protein 1kg", qty: 1, price: 499.99 }, { name: "Bioplus Energy", qty: 2, price: 89.99 }], driver: { name: "Siphamandla Dube", phone: "+263 77 334 5566", vehicle: "VW Polo · AEB 7790" } }),
     ],
     prescriptions: [
-      { id: "RX-2025-000021", fileName: "amlodipine.pdf", patientName: "Thabo Nkosi", doctorName: "Dr Patel", status: "Approved", uploadedAt: "2 days ago", notes: "Amlodipine 10mg" },
+      { id: "RX-2025-000021", fileName: "amlodipine.pdf", patientName: "Thabo Nkosi", doctorName: "Dr Patel", status: "Approved — Awaiting Payment", uploadedAt: "2 days ago", notes: "Amlodipine 10mg" },
     ],
   },
   {

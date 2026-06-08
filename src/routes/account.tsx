@@ -167,7 +167,7 @@ function AccountPage() {
                       <div className="text-sm font-bold">{p.id} · {p.fileName}</div>
                       <div className="text-xs text-muted-foreground">{p.doctorName} · {p.uploadedAt}</div>
                     </div>
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${p.status === "Approved" ? "bg-primary/10 text-primary" : p.status === "Dispensed" ? "bg-success/15 text-success" : p.status === "Rejected" ? "bg-destructive/10 text-destructive" : "bg-warning/15 text-foreground"}`}>{p.status}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${p.status === "Approved — Awaiting Payment" || p.status === "Paid" ? "bg-primary/10 text-primary" : p.status === "Dispensed" || p.status === "Delivered" ? "bg-success/15 text-success" : p.status === "Rejected" ? "bg-destructive/10 text-destructive" : "bg-warning/15 text-foreground"}`}>{p.status}</span>
                   </li>
                 ))}
               </ul>

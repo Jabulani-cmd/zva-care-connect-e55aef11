@@ -63,13 +63,13 @@ export default function PaymentModal({
   orderType,
   itemSummary,
 }: PaymentModalProps) {
-  const [selectedMethod, setSelectedMethod] = useState
+  const [selectedMethod, setSelectedMethod] = useState<
     string | null
   >(null);
-  const [formData, setFormData] = useState
+  const [formData, setFormData] = useState<
     Record<string, string>
   >({});
-  const [status, setStatus] = useState
+  const [status, setStatus] = useState<
     | "idle"
     | "processing"
     | "prompt_sent"
@@ -590,5 +590,107 @@ export default function PaymentModal({
                       setSelectedMethod(method.id);
                       setFormData({});
                     }}
-                    className="w-full flex items-center
-                      gap-3 p-3 rounded-lg border-2
+                    className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-colors ${
+                      isSelected
+                        ? "border-[#00853F] bg-[#F0F9F4]"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
+                      style={{
+                        background: method.bgColor,
+                        color: method.color,
+                      }}
+                    >
+                      {method.logo}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-gray-900">
+                          {method.name}
+                        </p>
+                        {method.popular && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+                            POPULAR
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">
+                        {method.description}
+                      </p>
+                    </div>
+                    {isMobileMoneyMethod(method.id) ? (
+                      <Smartphone size={16} className="text-gray-400" />
+                    ) : (
+                      <Building2 size={16} className="text-gray-400" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected method form */}
+            {selectedMethodData && !isBankTransfer(selectedMethod ?? "") && (
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-gray-600">
+                    {selectedMethodData.name} Details
+                  </p>
+                  <button
+                    onClick={fillDemo}
+                    className="text-xs font-semibold text-[#00853F] hover:underline"
+                  >
+                    Use demo data
+                  </button>
+                </div>
+                {selectedMethodData.fields.map((field) => (
+                  <div key={field.id}>
+                    <label className="text-xs font-semibold text-gray-700 block mb-1">
+                      {field.label}
+                    </label>
+                    <input
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      value={formData[field.id] ?? ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          [field.id]: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#00853F]"
+                    />
+                    <p className="text-[11px] text-gray-400 mt-1">
+                      {field.hint}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {selectedMethodData && isBankTransfer(selectedMethod ?? "") && (
+              <div className="mb-4 p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-800">
+                Click "Pay Now" to view ZIPIT transfer details.
+              </div>
+            )}
+
+            <button
+              onClick={handlePay}
+              disabled={!isFormValid()}
+              className="w-full py-3 rounded-lg text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ background: "#00853F" }}
+            >
+              <ShieldCheck size={16} />
+              Pay {formatAmount(amount)}
+            </button>
+
+            <p className="mt-3 text-[11px] text-gray-400 text-center flex items-center justify-center gap-1">
+              <Clock size={11} /> Secure payment processing
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

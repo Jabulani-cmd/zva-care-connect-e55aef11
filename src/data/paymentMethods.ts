@@ -234,7 +234,7 @@ export const ZIM_PAYMENT_METHODS: ZimPaymentMethod[] = [
 // Used to auto-fill fields during presentation
 // ============================================
 
-export const DEMO_PAYMENT_DETAILS: Record
+export const DEMO_PAYMENT_DETAILS: Record<
   string,
   Record<string, string>
 > = {
