@@ -31,7 +31,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
   const [assignFor, setAssignFor] =
     useState<StaffDelivery | null>(null);
 
-  // Prescription orders from shared store
   const sharedPrescriptions = useSharedPrescriptions(
     (s) => s.prescriptions
   );
@@ -42,7 +41,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
     (s) => s.updateStatus
   );
 
-  // Paid or dispensing prescription orders ready for dispatch
   const rxOrders = sharedPrescriptions.filter(
     (p) =>
       p.status === "Paid" ||
@@ -167,7 +165,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
         />
       </div>
 
-      {/* ── Prescription Orders Section ── */}
       {rxOrders.length > 0 && (
         <div className="mt-6">
           <div className="mb-3 flex items-center gap-2">
@@ -196,7 +193,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
                     borderWidth: isPaid ? "2px" : "1px",
                   }}
                 >
-                  {/* Header */}
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-2">
@@ -234,7 +230,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
                     )}
                   </div>
 
-                  {/* Medication */}
                   {rx.quotation && (
                     <div
                       className="mt-2 rounded-md px-2 py-1.5 text-xs"
@@ -253,7 +248,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
                     </div>
                   )}
 
-                  {/* Delivery address */}
                   <div className="mt-2 flex items-start gap-1.5 text-[11px] text-muted-foreground">
                     <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
                     {rx.delivery === "collect" ? (
@@ -278,7 +272,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
                     )}
                   </div>
 
-                  {/* Customer contact */}
                   {rx.customerPhone && (
                     <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                       <Phone className="h-3 w-3 text-primary" />
@@ -286,14 +279,12 @@ export function DispatcherDashboard({ view }: { view?: string }) {
                     </div>
                   )}
 
-                  {/* Paid at */}
                   {rx.paidAt && (
                     <div className="mt-1 text-[10px] text-muted-foreground">
                       Paid: {rx.paidAt}
                     </div>
                   )}
 
-                  {/* Driver assigned */}
                   {rx.driverName && (
                     <div
                       className="mt-2 rounded-md p-2 text-[11px]"
@@ -316,7 +307,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
                     </div>
                   )}
 
-                  {/* Actions */}
                   <div className="mt-3 flex gap-2">
                     {isPaid && !rx.driverName && (
                       <button
@@ -361,7 +351,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
         </div>
       )}
 
-      {/* ── OTC Orders Kanban ── */}
       <div className="mt-6">
         <div className="mb-3 flex items-center gap-2">
           <Package className="h-5 w-5 text-foreground" />
@@ -481,7 +470,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
         </div>
       </div>
 
-      {/* OTC assign driver modal */}
       {assignFor && (
         <AssignDriverModal
           delivery={assignFor}
@@ -491,7 +479,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
         />
       )}
 
-      {/* Prescription assign driver modal */}
       {assignRxFor && (
         <AssignRxDriverModal
           rxId={assignRxFor.id}
@@ -505,7 +492,6 @@ export function DispatcherDashboard({ view }: { view?: string }) {
   );
 }
 
-// ── Prescription driver assignment modal ──
 function AssignRxDriverModal({
   rxId,
   patientName,
@@ -581,7 +567,6 @@ function AssignRxDriverModal({
   );
 }
 
-// ── OTC assign driver modal ──
 function AssignDriverModal({
   delivery,
   drivers,
@@ -691,7 +676,7 @@ function DriversView({
                     {d.vehicle}
                   </div>
                 </div>
-                
+                <a
                   href={"tel:" + d.phone}
                   className="rounded-md border border-border p-2 hover:bg-muted"
                 >
