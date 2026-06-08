@@ -203,7 +203,7 @@ function TrackPage() {
 function RxTracker({
   rx,
 }: {
-  rx: ReturnType
+  rx: ReturnType<
     typeof useSharedPrescriptions.getState
   >["prescriptions"][0];
 }) {
@@ -459,7 +459,7 @@ function RxTracker({
                 </div>
               </div>
               {rx.driverPhone && (
-                
+                <a
                   href={"tel:" + rx.driverPhone}
                   className="rounded-md bg-primary p-2 text-primary-foreground hover:bg-primary-dark"
                   aria-label="Call driver"
@@ -476,9 +476,7 @@ function RxTracker({
               </p>
             )}
             {/* Live map for out-for-delivery */}
-            {isOutForDelivery && (
-              <RxLiveMap />
-            )}
+            {isOutForDelivery && <RxLiveMap />}
           </div>
         )}
 
@@ -818,7 +816,7 @@ function OrderTracker({ order }: { order: Order }) {
                   {order.driver.vehicle}
                 </div>
               </div>
-              
+              <a
                 href={"tel:" + order.driver.phone}
                 className="rounded-md bg-primary p-2 text-primary-foreground hover:bg-primary-dark"
                 aria-label="Call driver"
