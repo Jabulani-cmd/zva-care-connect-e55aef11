@@ -21,7 +21,6 @@ export const Route = createFileRoute("/account")({
   component: AccountPage,
 });
 
-// Prescription status stages for tracking bar
 const RX_STAGES = [
   { key: "Pending", label: "Submitted" },
   { key: "Under Review", label: "Under Review" },
@@ -39,11 +38,12 @@ function getRxStageIndex(status: string) {
 
 function PrescriptionTracker({
   rx,
+  onTrack,
 }: {
   rx: {
     id: string;
     status: string;
-    quotation?: { medicationName: string; total: number } | null;
+    quotation?: { medicationName: string; total: number; medicationCost: number; deliveryFee: number } | null;
     driverName?: string;
     driverPhone?: string;
     driverVehicle?: string;
@@ -60,24 +60,17 @@ function PrescriptionTracker({
     } | null;
     collectionBranchId?: string;
   };
+  onTrack: (id: string) => void;
 }) {
   const stageIdx = getRxStageIndex(rx.status);
   const isOutForDelivery = rx.status === "Out for Delivery";
   const isDelivered = rx.status === "Delivered";
-  const isActive =
-    rx.status !== "Delivered" &&
-    rx.status !== "Rejected" &&
-    rx.status !== "Pending";
 
   return (
     <div
       className="rounded-xl border p-4 shadow-sm"
       style={{
-        borderColor: isDelivered
-          ? "#00853F"
-          : isOutForDelivery
-          ? "#7C3AED"
-          : "#E5E7EB",
+        borderColor: isDelivered ? "#00853F" : isOutForDelivery ? "#7C3AED" : "#E5E7EB",
         background: isOutForDelivery ? "#F5F3FF" : "white",
       }}
     >
@@ -85,18 +78,10 @@ function PrescriptionTracker({
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-bold text-foreground">
-              {rx.id}
-            </span>
+            <span className="font-mono text-xs font-bold text-foreground">{rx.id}</span>
             <span
               className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
-              style={{
-                background: isDelivered
-                  ? "#00853F"
-                  : isOutForDelivery
-                  ? "#7C3AED"
-                  : "#F59E0B",
-              }}
+              style={{ background: isDelivered ? "#00853F" : isOutForDelivery ? "#7C3AED" : "#F59E0B" }}
             >
               {rx.status}
             </span>
@@ -107,19 +92,22 @@ function PrescriptionTracker({
             </p>
           )}
         </div>
-        {rx.quotation && (
-          <div className="text-right">
-            <div
-              className="text-base font-black"
-              style={{ color: "#00853F" }}
-            >
+        <div className="flex flex-col items-end gap-1">
+          {rx.quotation && (
+            <div className="text-base font-black" style={{ color: "#00853F" }}>
               ${rx.quotation.total.toFixed(2)}
             </div>
-            <div className="text-[10px] text-muted-foreground">
-              Paid
-            </div>
-          </div>
-        )}
+          )}
+          {/* Track button — navigates to /track page */}
+          <button
+            onClick={() => onTrack(rx.id)}
+            className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-bold text-white transition hover:opacity-90"
+            style={{ background: isOutForDelivery ? "#7C3AED" : "#00853F" }}
+          >
+            <Navigation className="h-3 w-3" />
+            {isOutForDelivery ? "Track Live" : "Track Order"}
+          </button>
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -132,37 +120,26 @@ function PrescriptionTracker({
               <div key={stage.key} className="flex flex-1 items-center">
                 <div className="flex flex-col items-center">
                   <div
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-colors"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
                     style={{
                       background: done ? "#00853F" : "#E5E7EB",
                       color: done ? "white" : "#9CA3AF",
+                      boxShadow: active ? "0 0 0 3px #BBF7D0" : "none",
                     }}
                   >
-                    {done && !active ? (
-                      <CheckCircle2 className="h-4 w-4" />
-                    ) : (
-                      i + 1
-                    )}
+                    {done && !active ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
                   </div>
                   <span
                     className="mt-1 whitespace-nowrap text-[9px] font-semibold"
-                    style={{
-                      color: active
-                        ? "#00853F"
-                        : done
-                        ? "#374151"
-                        : "#9CA3AF",
-                    }}
+                    style={{ color: active ? "#00853F" : done ? "#374151" : "#9CA3AF" }}
                   >
                     {stage.label}
                   </span>
                 </div>
                 {i < RX_STAGES.length - 1 && (
                   <div
-                    className="mx-1 h-0.5 flex-1 transition-colors"
-                    style={{
-                      background: i < stageIdx ? "#00853F" : "#E5E7EB",
-                    }}
+                    className="mx-1 h-0.5 flex-1"
+                    style={{ background: i < stageIdx ? "#00853F" : "#E5E7EB" }}
                   />
                 )}
               </div>
@@ -171,79 +148,55 @@ function PrescriptionTracker({
         </div>
       </div>
 
-      {/* Driver info when out for delivery */}
+      {/* Driver info */}
       {(isOutForDelivery || isDelivered) && rx.driverName && (
         <div
           className="mt-4 rounded-lg p-3"
           style={{
             background: isDelivered ? "#F0F9F4" : "#EDE9FE",
-            border: isDelivered
-              ? "1px solid #BBF7D0"
-              : "1px solid #DDD6FE",
+            border: isDelivered ? "1px solid #BBF7D0" : "1px solid #DDD6FE",
           }}
         >
           <p
             className="mb-2 text-[10px] font-bold uppercase tracking-wide"
             style={{ color: isDelivered ? "#00853F" : "#7C3AED" }}
           >
-            {isDelivered ? "Delivered By" : "Your Driver"}
+            {isDelivered ? "Delivered By" : "Your Driver — On the way"}
           </p>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <div className="flex items-center gap-2">
               <div
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                style={{
-                  background: isDelivered ? "#00853F" : "#7C3AED",
-                }}
+                style={{ background: isDelivered ? "#00853F" : "#7C3AED" }}
               >
-                {rx.driverName
-                  .split(" ")
-                  .map((n: string) => n[0])
-                  .slice(0, 2)
-                  .join("")}
+                {rx.driverName.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
               </div>
               <div>
-                <p className="text-sm font-bold text-[#111827]">
-                  {rx.driverName}
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  Driver
-                </p>
+                <p className="text-sm font-bold text-[#111827]">{rx.driverName}</p>
+                <p className="text-[10px] text-muted-foreground">Driver</p>
               </div>
             </div>
             {rx.driverVehicle && (
               <div className="flex items-center gap-2">
-                <Car
-                  className="h-4 w-4 shrink-0"
-                  style={{ color: isDelivered ? "#00853F" : "#7C3AED" }}
-                />
+                <Car className="h-4 w-4 shrink-0" style={{ color: isDelivered ? "#00853F" : "#7C3AED" }} />
                 <div>
-                  <p className="text-sm font-semibold text-[#111827]">
-                    {rx.driverVehicle}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    Vehicle
-                  </p>
+                  <p className="text-sm font-semibold text-[#111827]">{rx.driverVehicle}</p>
+                  <p className="text-[10px] text-muted-foreground">Vehicle</p>
                 </div>
               </div>
             )}
             {rx.driverPhone && (
               <div className="flex items-center gap-2">
-                <Phone
-                  className="h-4 w-4 shrink-0"
-                  style={{ color: isDelivered ? "#00853F" : "#7C3AED" }}
-                />
+                <Phone className="h-4 w-4 shrink-0" style={{ color: isDelivered ? "#00853F" : "#7C3AED" }} />
                 <div>
-                  <a
+                  
                     href={"tel:" + rx.driverPhone}
                     className="text-sm font-semibold"
                     style={{ color: isDelivered ? "#00853F" : "#7C3AED" }}
                   >
                     {rx.driverPhone}
                   </a>
-                  <p className="text-[10px] text-muted-foreground">
-                    Call driver
-                  </p>
+                  <p className="text-[10px] text-muted-foreground">Tap to call</p>
                 </div>
               </div>
             )}
@@ -251,34 +204,41 @@ function PrescriptionTracker({
           {rx.dispatchedAt && (
             <p className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
               <Clock className="h-3 w-3" />
-              {isDelivered ? "Delivered" : "Dispatched"}:{" "}
-              {rx.dispatchedAt}
+              {isDelivered ? "Delivered" : "Dispatched"}: {rx.dispatchedAt}
             </p>
+          )}
+          {/* Live track CTA */}
+          {isOutForDelivery && (
+            <button
+              onClick={() => onTrack(rx.id)}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-bold text-white"
+              style={{ background: "#7C3AED" }}
+            >
+              <Navigation className="h-4 w-4" />
+              View Live Map &rarr;
+            </button>
           )}
         </div>
       )}
 
       {/* Delivery address */}
-      {isActive && rx.delivery === "delivery" && rx.deliveryAddress && (
+      {rx.delivery === "delivery" && rx.deliveryAddress && (
         <div className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
-          <Navigation className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
           <span>
-            Delivering to: {rx.deliveryAddress.streetAddress},{" "}
-            {rx.deliveryAddress.suburb}, {rx.deliveryAddress.city} ·{" "}
-            {rx.deliveryAddress.phone}
+            {rx.deliveryAddress.firstName} {rx.deliveryAddress.lastName} &middot;{" "}
+            {rx.deliveryAddress.streetAddress}, {rx.deliveryAddress.suburb},{" "}
+            {rx.deliveryAddress.city}
           </span>
         </div>
       )}
-
       {rx.delivery === "collect" && (
         <div className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
           <Store className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
           <span>
             Collection:{" "}
             {rx.collectionBranchId
-              ? rx.collectionBranchId
-                  .replace(/_/g, " ")
-                  .replace(/\b\w/g, (c: string) => c.toUpperCase())
+              ? rx.collectionBranchId.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())
               : "Your chosen branch"}
           </span>
         </div>
@@ -293,23 +253,13 @@ function AccountPage() {
   const prescriptions = useAuth((s) => s.prescriptions);
   const logout = useAuth((s) => s.logout);
   const navigate = useNavigate();
-
-  // ✅ Only one declaration – keep the one with line breaks (more readable)
-  const sharedPrescriptions = useSharedPrescriptions(
-    (s) => s.prescriptions
-  );
+  const sharedPrescriptions = useSharedPrescriptions((s) => s.prescriptions);
   const markSharedPaid = useSharedPrescriptions((s) => s.markPaid);
-
-  // ✅ Only one wishlist declaration
-  const wishlist = useShop((s) => s.wishlist)
-    .map(getProduct)
-    .filter(Boolean);
-
-  // ✅ Unique state declarations
+  const wishlist = useShop((s) => s.wishlist).map(getProduct).filter(Boolean);
   const [tab, setTab] = useState("dash");
-  const [activeReceipt, setActiveReceipt] = useState<Receipt | null>(null);
-  const [payingRx, setPayingRx] = useState<(typeof sharedPrescriptions)[0] | null>(null);
-  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+  const [activeReceipt, setActiveReceipt] = useState(null as Receipt | null);
+  const [payingRx, setPayingRx] = useState(null as (typeof sharedPrescriptions)[0] | null);
+  const [dismissedIds, setDismissedIds] = useState([] as string[]);
 
   useEffect(() => {
     if (!user) navigate({ to: "/auth" });
@@ -328,7 +278,6 @@ function AccountPage() {
       !dismissedIds.includes(p.id)
   );
 
-  // Active prescription orders (paid and beyond, not yet delivered)
   const activeRxOrders = mySharedPrescriptions.filter(
     (p) =>
       p.status === "Paid" ||
@@ -336,10 +285,14 @@ function AccountPage() {
       p.status === "Out for Delivery"
   );
 
-  // Delivered prescription orders
   const deliveredRxOrders = mySharedPrescriptions.filter(
     (p) => p.status === "Delivered"
   );
+
+  // Navigate to /track page with order ID pre-filled
+  const handleTrackRx = (id: string) => {
+    navigate({ to: "/track", search: { order: id } });
+  };
 
   const openReceiptFor = (orderId: string) => {
     const o = orders.find((x) => x.id === orderId);
@@ -385,6 +338,7 @@ function AccountPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
+
       {/* Payment notification banners */}
       {pendingPayment.length > 0 && (
         <div className="mb-6 space-y-3">
@@ -393,8 +347,7 @@ function AccountPage() {
               key={rx.id}
               className="relative rounded-xl p-4 shadow-sm"
               style={{
-                background:
-                  "linear-gradient(135deg, #F0F9F4 0%, #DCFCE7 100%)",
+                background: "linear-gradient(135deg, #F0F9F4 0%, #DCFCE7 100%)",
                 border: "2px solid #00853F",
               }}
             >
@@ -414,25 +367,17 @@ function AccountPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
-                      style={{ background: "#00853F" }}
-                    >
+                    <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ background: "#00853F" }}>
                       ACTION REQUIRED
                     </span>
-                    <span className="text-[10px] text-[#6B7280]">
-                      Ref: {rx.id}
-                    </span>
+                    <span className="text-[10px] text-[#6B7280]">Ref: {rx.id}</span>
                   </div>
                   <h3 className="mt-1 text-base font-bold text-[#111827]">
                     Your prescription has been approved
                   </h3>
                   <p className="mt-0.5 text-sm text-[#374151]">
-                    <strong>{rx.quotation?.medicationName}</strong>{" "}
-                    approved by {rx.quotation?.pharmacistName}
-                    {rx.quotation?.approvedAt
-                      ? " at " + rx.quotation.approvedAt
-                      : ""}
+                    <strong>{rx.quotation?.medicationName}</strong> approved by {rx.quotation?.pharmacistName}
+                    {rx.quotation?.approvedAt ? " at " + rx.quotation.approvedAt : ""}
                   </p>
                   {rx.quotation?.notes && (
                     <p className="mt-1 text-xs text-[#6B7280] italic">
@@ -442,54 +387,31 @@ function AccountPage() {
                   {rx.quotation && (
                     <div
                       className="mt-3 inline-flex flex-wrap gap-4 rounded-lg px-4 py-2 text-sm"
-                      style={{
-                        background: "rgba(255,255,255,0.7)",
-                        border: "1px solid #BBF7D0",
-                      }}
+                      style={{ background: "rgba(255,255,255,0.7)", border: "1px solid #BBF7D0" }}
                     >
                       <div className="text-center">
-                        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">
-                          Medication
-                        </div>
-                        <div className="font-bold text-[#111827]">
-                          ${rx.quotation.medicationCost.toFixed(2)}
-                        </div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Medication</div>
+                        <div className="font-bold text-[#111827]">${rx.quotation.medicationCost.toFixed(2)}</div>
                       </div>
                       {rx.quotation.deliveryFee > 0 && (
                         <>
-                          <div className="self-center text-[#D1D5DB]">
-                            +
-                          </div>
+                          <div className="self-center text-[#D1D5DB]">+</div>
                           <div className="text-center">
-                            <div className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">
-                              Delivery
-                            </div>
-                            <div className="font-bold text-[#111827]">
-                              ${rx.quotation.deliveryFee.toFixed(2)}
-                            </div>
+                            <div className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Delivery</div>
+                            <div className="font-bold text-[#111827]">${rx.quotation.deliveryFee.toFixed(2)}</div>
                           </div>
                         </>
                       )}
                       <div className="self-center text-[#D1D5DB]">=</div>
                       <div className="text-center">
-                        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">
-                          Total Due
-                        </div>
-                        <div
-                          className="text-lg font-black"
-                          style={{ color: "#00853F" }}
-                        >
-                          ${rx.quotation.total.toFixed(2)}
-                        </div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Total Due</div>
+                        <div className="text-lg font-black" style={{ color: "#00853F" }}>${rx.quotation.total.toFixed(2)}</div>
                       </div>
                     </div>
                   )}
                   <p className="mt-2 text-xs text-[#6B7280]">
-                    {rx.delivery === "collect"
-                      ? "Collection in-store — FREE"
-                      : "Home delivery included"}
-                    {" · "}Pay via EcoCash, OneMoney, ZimSwitch or
-                    Bank Transfer
+                    {rx.delivery === "collect" ? "Collection in-store — FREE" : "Home delivery included"}
+                    {" · "}Pay via EcoCash, OneMoney, ZimSwitch or Bank Transfer
                   </p>
                 </div>
                 <button
@@ -505,11 +427,11 @@ function AccountPage() {
         </div>
       )}
 
-      {/* Active prescription delivery tracking banners */}
+      {/* Active prescription tracking banners */}
       {activeRxOrders.length > 0 && (
         <div className="mb-6 space-y-3">
           {activeRxOrders.map((rx) => (
-            <PrescriptionTracker key={rx.id} rx={rx} />
+            <PrescriptionTracker key={rx.id} rx={rx} onTrack={handleTrackRx} />
           ))}
         </div>
       )}
@@ -518,25 +440,20 @@ function AccountPage() {
       <div className="rounded-lg border border-[#E5E7EB] bg-[#F0F9F4] p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">
-              My Account
-            </p>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">My Account</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#111827] md:text-3xl">
               Welcome back, {user.firstName}
             </h1>
             <p className="mt-1 text-sm text-[#374151]">
-              {orders.length} order{orders.length !== 1 ? "s" : ""}{" "}
-              &middot;{" "}
-              {prescriptions.length} prescription
-              {prescriptions.length !== 1 ? "s" : ""} on file
+              {orders.length} order{orders.length !== 1 ? "s" : ""} &middot;{" "}
+              {prescriptions.length} prescription{prescriptions.length !== 1 ? "s" : ""} on file
               {pendingPayment.length > 0 && (
                 <span
                   className="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
                   style={{ background: "#DC2626" }}
                 >
                   <Bell className="h-2.5 w-2.5" />
-                  {pendingPayment.length} payment
-                  {pendingPayment.length !== 1 ? "s" : ""} pending
+                  {pendingPayment.length} payment{pendingPayment.length !== 1 ? "s" : ""} pending
                 </span>
               )}
               {activeRxOrders.length > 0 && (
@@ -545,8 +462,7 @@ function AccountPage() {
                   style={{ background: "#7C3AED" }}
                 >
                   <Truck className="h-2.5 w-2.5" />
-                  {activeRxOrders.length} order
-                  {activeRxOrders.length !== 1 ? "s" : ""} in transit
+                  {activeRxOrders.length} order{activeRxOrders.length !== 1 ? "s" : ""} in transit
                 </span>
               )}
             </p>
@@ -572,20 +488,15 @@ function AccountPage() {
                   onClick={() => setTab(t.id)}
                   className={
                     "relative flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition " +
-                    (tab === t.id
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-muted")
+                    (tab === t.id ? "bg-primary text-primary-foreground" : "hover:bg-muted")
                   }
                 >
                   <Icon className="h-4 w-4" /> {t.label}
-                  {isPrescriptions &&
-                    pendingPayment.length + activeRxOrders.length >
-                      0 && (
-                      <span className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white">
-                        {pendingPayment.length +
-                          activeRxOrders.length}
-                      </span>
-                    )}
+                  {isPrescriptions && pendingPayment.length + activeRxOrders.length > 0 && (
+                    <span className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white">
+                      {pendingPayment.length + activeRxOrders.length}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -600,9 +511,7 @@ function AccountPage() {
                 <div className="mt-3 space-y-1 text-sm">
                   <div>
                     <span className="text-muted-foreground">Name:</span>{" "}
-                    <strong>
-                      {user.firstName} {user.lastName}
-                    </strong>
+                    <strong>{user.firstName} {user.lastName}</strong>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Email:</span>{" "}
@@ -619,8 +528,7 @@ function AccountPage() {
                   to="/prescriptions"
                   className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase text-primary-foreground hover:bg-primary-dark"
                 >
-                  <FileText className="h-3.5 w-3.5" /> Upload a new
-                  prescription
+                  <FileText className="h-3.5 w-3.5" /> Upload a new prescription
                 </Link>
               </div>
 
@@ -628,56 +536,38 @@ function AccountPage() {
                 <h3 className="font-extrabold">Active delivery</h3>
                 {(() => {
                   const activeRx = activeRxOrders[0];
-                  const activeOtc = orders.find(
-                    (o) => o.status !== "Delivered"
-                  );
+                  const activeOtc = orders.find((o) => o.status !== "Delivered");
                   if (activeRx) {
                     return (
                       <div className="mt-3 text-sm">
                         <div className="font-bold">{activeRx.id}</div>
-                        <div className="text-muted-foreground">
-                          {activeRx.quotation?.medicationName}
-                        </div>
+                        <div className="text-muted-foreground">{activeRx.quotation?.medicationName}</div>
                         <span
                           className="mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-bold text-white"
-                          style={{
-                            background:
-                              activeRx.status === "Out for Delivery"
-                                ? "#7C3AED"
-                                : "#F59E0B",
-                          }}
+                          style={{ background: activeRx.status === "Out for Delivery" ? "#7C3AED" : "#F59E0B" }}
                         >
                           {activeRx.status}
                         </span>
                         {activeRx.driverName && (
                           <div className="mt-2 text-xs text-muted-foreground">
-                            Driver: {activeRx.driverName} &middot;{" "}
-                            {activeRx.driverVehicle}
+                            Driver: {activeRx.driverName} &middot; {activeRx.driverVehicle}
                           </div>
                         )}
                         <button
-                          onClick={() => setTab("scripts")}
+                          onClick={() => handleTrackRx(activeRx.id)}
                           className="mt-3 flex items-center gap-1 text-sm font-bold text-primary hover:underline"
                         >
-                          <Truck className="h-4 w-4" /> Track
-                          prescription &rarr;
+                          <Truck className="h-4 w-4" /> Track prescription &rarr;
                         </button>
                       </div>
                     );
                   }
                   if (!activeOtc)
-                    return (
-                      <p className="mt-3 text-sm text-muted-foreground">
-                        No active deliveries.
-                      </p>
-                    );
+                    return <p className="mt-3 text-sm text-muted-foreground">No active deliveries.</p>;
                   return (
                     <div className="mt-3 text-sm">
                       <div className="font-bold">{activeOtc.id}</div>
-                      <div className="text-muted-foreground">
-                        {activeOtc.date} &middot;{" "}
-                        {formatUSD(activeOtc.total)}
-                      </div>
+                      <div className="text-muted-foreground">{activeOtc.date} &middot; {formatUSD(activeOtc.total)}</div>
                       <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
                         {activeOtc.status}
                       </span>
@@ -686,8 +576,7 @@ function AccountPage() {
                         search={{ order: activeOtc.id }}
                         className="mt-3 flex items-center gap-1 text-sm font-bold text-primary hover:underline"
                       >
-                        <Truck className="h-4 w-4" /> Track delivery
-                        &rarr;
+                        <Truck className="h-4 w-4" /> Track delivery &rarr;
                       </Link>
                     </div>
                   );
@@ -697,41 +586,22 @@ function AccountPage() {
               <div className="rounded-xl border border-border bg-card p-5 sm:col-span-2">
                 <h3 className="font-extrabold">Quick Links</h3>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <Link
-                    to="/prescriptions"
-                    className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary"
-                  >
+                  <Link to="/prescriptions" className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary">
                     <FileText className="h-4 w-4" /> Upload Script
                   </Link>
-                  <Link
-                    to="/track"
-                    className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary"
-                  >
+                  <Link to="/track" className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary">
                     <Truck className="h-4 w-4" /> Track Order
                   </Link>
-                  <Link
-                    to="/services"
-                    className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary"
-                  >
+                  <Link to="/services" className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary">
                     <Syringe className="h-4 w-4" /> Vaccinations
                   </Link>
-                  <Link
-                    to="/services"
-                    className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary"
-                  >
+                  <Link to="/services" className="flex items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white p-3 text-sm font-semibold text-[#374151] hover:border-primary hover:text-primary">
                     <Store className="h-4 w-4" /> Find Store
                   </Link>
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-4 text-center">
                   <Stat label="Orders" value={orders.length} />
-                  <Stat
-                    label="Pending scripts"
-                    value={
-                      mySharedPrescriptions.filter(
-                        (p) => p.status === "Pending"
-                      ).length
-                    }
-                  />
+                  <Stat label="Pending scripts" value={mySharedPrescriptions.filter((p) => p.status === "Pending").length} />
                   <Stat label="Wishlist" value={wishlist.length} />
                 </div>
               </div>
@@ -754,29 +624,18 @@ function AccountPage() {
                   {orders.map((o) => (
                     <tr key={o.id}>
                       <td className="px-4 py-3 font-bold">{o.id}</td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {o.date}
-                      </td>
-                      <td className="px-4 py-3">
-                        <StatusPill status={o.status} />
-                      </td>
-                      <td className="px-4 py-3 font-bold">
-                        {formatUSD(o.total)}
-                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{o.date}</td>
+                      <td className="px-4 py-3"><StatusPill status={o.status} /></td>
+                      <td className="px-4 py-3 font-bold">{formatUSD(o.total)}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openReceiptFor(o.id)}
                             className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-bold text-foreground hover:border-primary hover:text-primary"
                           >
-                            <ReceiptIcon className="h-3.5 w-3.5" />{" "}
-                            Receipt
+                            <ReceiptIcon className="h-3.5 w-3.5" /> Receipt
                           </button>
-                          <Link
-                            to="/track"
-                            search={{ order: o.id }}
-                            className="text-sm font-bold text-primary hover:underline"
-                          >
+                          <Link to="/track" search={{ order: o.id }} className="text-sm font-bold text-primary hover:underline">
                             Track &rarr;
                           </Link>
                         </div>
@@ -792,15 +651,13 @@ function AccountPage() {
             <div className="space-y-4">
               {(activeRxOrders.length > 0 || deliveredRxOrders.length > 0) && (
                 <div>
-                  <h3 className="mb-3 font-extrabold text-foreground">
-                    Prescription Order Tracking
-                  </h3>
+                  <h3 className="mb-3 font-extrabold text-foreground">Prescription Order Tracking</h3>
                   <div className="space-y-3">
                     {activeRxOrders.map((rx) => (
-                      <PrescriptionTracker key={rx.id} rx={rx} />
+                      <PrescriptionTracker key={rx.id} rx={rx} onTrack={handleTrackRx} />
                     ))}
                     {deliveredRxOrders.map((rx) => (
-                      <PrescriptionTracker key={rx.id} rx={rx} />
+                      <PrescriptionTracker key={rx.id} rx={rx} onTrack={handleTrackRx} />
                     ))}
                   </div>
                 </div>
@@ -823,21 +680,14 @@ function AccountPage() {
                       <div
                         key={rx.id}
                         className="flex items-center gap-3 rounded-lg p-3"
-                        style={{
-                          background: "#F0F9F4",
-                          border: "1.5px solid #00853F",
-                        }}
+                        style={{ background: "#F0F9F4", border: "1.5px solid #00853F" }}
                       >
                         <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-[#111827]">
-                            {rx.quotation?.medicationName}
-                          </p>
+                          <p className="text-sm font-bold text-[#111827]">{rx.quotation?.medicationName}</p>
                           <p className="text-xs text-[#6B7280]">
                             Approved &middot; Total due:{" "}
-                            <strong className="text-[#00853F]">
-                              ${rx.quotation?.total.toFixed(2)}
-                            </strong>
+                            <strong className="text-[#00853F]">${rx.quotation?.total.toFixed(2)}</strong>
                           </p>
                         </div>
                         <button
@@ -853,31 +703,16 @@ function AccountPage() {
                 )}
 
                 <ul className="mt-4 divide-y divide-border">
-                  {(mySharedPrescriptions.length > 0
-                    ? mySharedPrescriptions
-                    : prescriptions
-                  ).map((p) => (
-                    <li
-                      key={p.id}
-                      className="flex items-center gap-3 py-3"
-                    >
+                  {(mySharedPrescriptions.length > 0 ? mySharedPrescriptions : prescriptions).map((p) => (
+                    <li key={p.id} className="flex items-center gap-3 py-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                         <FileText className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-bold">
-                          {p.id} &middot; {p.fileName}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {p.doctorName} &middot; {p.uploadedAt}
-                        </div>
+                        <div className="text-sm font-bold">{p.id} &middot; {p.fileName}</div>
+                        <div className="text-xs text-muted-foreground">{p.doctorName} &middot; {p.uploadedAt}</div>
                       </div>
-                      <span
-                        className={
-                          "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold " +
-                          scriptStatusColor(p.status)
-                        }
-                      >
+                      <span className={"shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold " + scriptStatusColor(p.status)}>
                         {p.status}
                       </span>
                     </li>
@@ -887,32 +722,21 @@ function AccountPage() {
             </div>
           )}
 
-          {tab === "wishlist" &&
-            (wishlist.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">
-                Nothing wishlisted yet.
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {wishlist.map((p) => (
-                  <ProductCard key={p!.id} product={p!} />
-                ))}
-              </div>
-            ))}
+          {tab === "wishlist" && (
+            wishlist.length === 0
+              ? <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">Nothing wishlisted yet.</div>
+              : <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{wishlist.map((p) => <ProductCard key={p!.id} product={p!} />)}</div>
+          )}
 
           {tab === "address" && (
             <div className="rounded-xl border border-border bg-card p-5">
               <h3 className="font-extrabold">Default Address</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                {user.firstName} {user.lastName}
-                <br />
-                18 Sam Nujoma Street, Avondale
-                <br />
+                {user.firstName} {user.lastName}<br />
+                18 Sam Nujoma Street, Avondale<br />
                 Harare, Zimbabwe
               </p>
-              <button className="mt-4 rounded-md border border-border px-4 py-2 text-sm font-bold hover:bg-muted">
-                Edit
-              </button>
+              <button className="mt-4 rounded-md border border-border px-4 py-2 text-sm font-bold hover:bg-muted">Edit</button>
             </div>
           )}
 
@@ -920,32 +744,16 @@ function AccountPage() {
             <div className="rounded-xl border border-border bg-card p-5">
               <h3 className="font-extrabold">Account</h3>
               <div className="mt-3 grid gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Email:</span>{" "}
-                  <strong>{user.email}</strong>
-                </div>
+                <div><span className="text-muted-foreground">Email:</span> <strong>{user.email}</strong></div>
                 {user.phone && (
-                  <div>
-                    <span className="text-muted-foreground">
-                      Mobile:
-                    </span>{" "}
-                    <strong>{user.phone}</strong>
-                  </div>
+                  <div><span className="text-muted-foreground">Mobile:</span> <strong>{user.phone}</strong></div>
                 )}
               </div>
               <h3 className="mt-6 font-extrabold">Notifications</h3>
               <div className="mt-3 space-y-2 text-sm">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" defaultChecked /> Order
-                  updates
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" defaultChecked /> Promotions
-                  &amp; deals
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" /> Health tips newsletter
-                </label>
+                <label className="flex items-center gap-2"><input type="checkbox" defaultChecked /> Order updates</label>
+                <label className="flex items-center gap-2"><input type="checkbox" defaultChecked /> Promotions &amp; deals</label>
+                <label className="flex items-center gap-2"><input type="checkbox" /> Health tips newsletter</label>
               </div>
               <button
                 onClick={onLogout}
@@ -966,19 +774,15 @@ function AccountPage() {
             markSharedPaid(payingRx.id, ref, method);
             setDismissedIds((prev) => [...prev, payingRx.id]);
             setPayingRx(null);
-            toast.success(
-              "Payment confirmed — your medication will be dispatched shortly"
-            );
+            toast.success("Payment confirmed — your medication will be dispatched shortly");
           }}
           amount={payingRx.quotation.total}
           orderId={payingRx.id}
           rxRef={payingRx.id}
           orderType="Prescription"
           itemSummary={
-            payingRx.quotation.medicationName +
-            " · " +
-            payingRx.quotation.quantity +
-            " · Approved by " +
+            payingRx.quotation.medicationName + " · " +
+            payingRx.quotation.quantity + " · Approved by " +
             payingRx.quotation.pharmacistName
           }
         />
@@ -996,11 +800,9 @@ function AccountPage() {
 }
 
 function scriptStatusColor(status: string) {
-  if (status === "Approved — Awaiting Payment")
-    return "bg-amber-50 text-amber-700";
+  if (status === "Approved — Awaiting Payment") return "bg-amber-50 text-amber-700";
   if (status === "Paid") return "bg-blue-50 text-blue-700";
-  if (status === "Dispensed" || status === "Delivered")
-    return "bg-[#F0F9F4] text-primary";
+  if (status === "Dispensed" || status === "Delivered") return "bg-[#F0F9F4] text-primary";
   if (status === "Rejected") return "bg-red-50 text-red-700";
   if (status === "Out for Delivery") return "bg-sky-50 text-sky-700";
   if (status === "Dispensing") return "bg-violet-50 text-violet-700";
@@ -1010,30 +812,17 @@ function scriptStatusColor(status: string) {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-lg bg-surface p-3">
-      <div className="text-2xl font-extrabold text-primary">
-        {value}
-      </div>
-      <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-        {label}
-      </div>
+      <div className="text-2xl font-extrabold text-primary">{value}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>
   );
 }
 
 function StatusPill({ status }: { status: Order["status"] }) {
   const cls =
-    status === "Delivered"
-      ? "bg-success/15 text-success"
-      : status === "Out for delivery"
-      ? "bg-accent/15 text-accent-foreground"
-      : status === "Packed"
-      ? "bg-primary/10 text-primary"
-      : "bg-warning/20 text-foreground";
-  return (
-    <span
-      className={"rounded-full px-2 py-0.5 text-xs font-bold " + cls}
-    >
-      {status}
-    </span>
-  );
+    status === "Delivered" ? "bg-success/15 text-success" :
+    status === "Out for delivery" ? "bg-accent/15 text-accent-foreground" :
+    status === "Packed" ? "bg-primary/10 text-primary" :
+    "bg-warning/20 text-foreground";
+  return <span className={"rounded-full px-2 py-0.5 text-xs font-bold " + cls}>{status}</span>;
 }
